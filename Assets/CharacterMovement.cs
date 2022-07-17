@@ -26,8 +26,18 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private float _dashSpeed;
     [SerializeField] private float _dashTime;
     [SerializeField] private GameObject _dashTrailObject;
-    // Update is called once per frame
+    private int _rotateSpeedHolder;
+    [SerializeField] private Camera _mainCamera;
+    [SerializeField] private WeaponTypes _currentWeaponType;
+    [SerializeField] private WeaponSO _currentWeapon;
+    public int _weaponDashCounter = 0;
+    private Vector3 _clampedDash;
 
+    public enum WeaponTypes { Sword, Bow}
+    private void Start()
+    {
+        _rotateSpeedHolder = _rotateSpeed;
+    }
     private void OnEnable()
     {
         _inputActions.Enable();
@@ -66,12 +76,23 @@ public class CharacterMovement : MonoBehaviour
         if (_direction.x > 0f && _direction.y < 0f)
             _offsetDirection = new Vector3(0f, 0f, -1f);
 
+        if(_isAttacking)
+        {
+            _offsetDirection = new Vector3(0f, 0f, 0f);
+            _rotateSpeed = 0;
+        }
+        else
+        {
+            _rotateSpeed = _rotateSpeedHolder;
+        }
+
         if(_fixedDirection.magnitude > 0.2f)
         {
             transform.rotation = Quaternion.Lerp(_staticRotation.transform.rotation, Quaternion.LookRotation(_fixedDirection) * Quaternion.Euler(0f, 45f, 0f), Time.deltaTime * _rotateSpeed);
         }
 
         _animator.SetFloat("MoveSpeed", _offsetDirection.magnitude);
+
 
         if(_offsetDirection.magnitude >= 0.1f)
         {
@@ -87,6 +108,18 @@ public class CharacterMovement : MonoBehaviour
             {
                 _animator.SetBool("BackToMove", false);
                 _animationTrigger = true;
+                Ray _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
+                Plane _groundPlane = new Plane(Vector3.up, Vector3.zero);
+                float _rayLength;
+
+                if (_groundPlane.Raycast(_cameraRay, out _rayLength))
+                {
+                    Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
+                    transform.LookAt(_pointToLook);
+                    Vector3 _pointToDash = _pointToLook - this.transform.transform.position;
+                    _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
+                    //StartCoroutine(DashFromWeapon(_clampedDash, 5));
+                }
             }
             else if(!_animationTrigger)
             {
@@ -98,8 +131,21 @@ public class CharacterMovement : MonoBehaviour
 
         if(Input.GetMouseButtonDown(0) && !_isAttacking)
         {
-            _animator.Play("Attack1");
+            _animator.Play("GreatSword2");
             _isAttacking = true;
+            _weaponDashCounter = 0;
+            Ray _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
+            Plane _groundPlane = new Plane(Vector3.up, Vector3.zero);
+            float _rayLength;
+
+            if (_groundPlane.Raycast(_cameraRay, out _rayLength))
+            {
+                Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
+                transform.LookAt(_pointToLook);
+                Vector3 _pointToDash = _pointToLook - this.transform.transform.position;
+                _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
+                //StartCoroutine(DashFromWeapon(_clampedDash, 5));
+            }
         }
 
         if(Input.GetKeyDown(KeyCode.LeftShift))
@@ -112,15 +158,34 @@ public class CharacterMovement : MonoBehaviour
     {
         float _startTime = Time.time;
         //_dashTrailObject.SetActive(true);
-        //_dashTrailObject.GetComponent<TrailRenderer>().emitting = true;
-        while(Time.time < _startTime + _dashTime)
+        _dashTrailObject.GetComponent<TrailRenderer>().emitting = true;
+        while (Time.time < _startTime + _dashTime)
         {
             _characterController.Move(offsetDirection * _dashSpeed * Time.deltaTime);
             yield return null;
         }
-        //if(Time.time < _startTime + _dashTime)
-        //{
-        //    _dashTrailObject.GetComponent<TrailRenderer>().emitting = false;
-        //}
+        _dashTrailObject.GetComponent<TrailRenderer>().emitting = false;
     }
+
+    public void StartDashFromWeapon()
+    {
+        StartCoroutine(DashFromWeapon());
+    }
+    IEnumerator DashFromWeapon()
+    {
+        float _startTime = Time.time;
+        while (Time.time < _startTime + _dashTime)
+        {
+            _characterController.Move(_clampedDash * _currentWeapon._weaponDashPerAttack[_weaponDashCounter] * Time.deltaTime);
+            yield return null;
+        }
+
+        if (_weaponDashCounter < 3)
+            _weaponDashCounter++;
+        else
+            _weaponDashCounter = 0;
+
+    }
+
 }
+

@@ -1,0 +1,13 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "New Weapon", menuName = "Weapon")]
+public class WeaponSO : ScriptableObject
+{
+    public string _weaponName;
+    public float[] _weaponDashPerAttack;
+    public float[] _weaponDamagePerAttack;
+    public CharacterMovement.WeaponTypes _weaponType;
+
+}

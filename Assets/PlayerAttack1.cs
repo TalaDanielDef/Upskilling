@@ -11,7 +11,7 @@ public class PlayerAttack1 : CharacterStateBase
         GetCharacterMovement(animator)._animationFlag = true;
         GetCharacterMovement(animator)._isAttacking = true;
         GetCharacterMovement(animator)._animationTrigger = false;
-        Debug.Log("Animation 1");
+        GetCharacterMovement(animator).StartDashFromWeapon();
     }
 
     //OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
@@ -27,8 +27,6 @@ public class PlayerAttack1 : CharacterStateBase
 
         GetCharacterMovement(animator)._isAttacking = false;
         //GetCharacterMovement(animator)._animationFlag = false;
-
-        Debug.Log("Animation 2");
     }
 
     // OnStateMove is called right after Animator.OnAnimatorMove()
