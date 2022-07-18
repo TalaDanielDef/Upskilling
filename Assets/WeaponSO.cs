@@ -7,7 +7,8 @@ public class WeaponSO : ScriptableObject
 {
     public string _weaponName;
     public float[] _weaponDashPerAttack;
-    public float[] _weaponDamagePerAttack;
+    public int[] _weaponDamagePerAttack;
+    // float[] _weapon
     public CharacterMovement.WeaponTypes _weaponType;
 
 }

@@ -32,7 +32,7 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private WeaponSO _currentWeapon;
     public int _weaponDashCounter = 0;
     private Vector3 _clampedDash;
-
+    public int _currentWeaponDamage = 0;
     public enum WeaponTypes { Sword, Bow}
     private void Start()
     {
@@ -118,8 +118,14 @@ public class CharacterMovement : MonoBehaviour
                     transform.LookAt(_pointToLook);
                     Vector3 _pointToDash = _pointToLook - this.transform.transform.position;
                     _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
+                    Debug.Log(_clampedDash);
                     //StartCoroutine(DashFromWeapon(_clampedDash, 5));
                 }
+                if(_weaponDashCounter == 3)
+                {
+                    _weaponDashCounter = 0;
+                }
+                
             }
             else if(!_animationTrigger)
             {
@@ -134,6 +140,8 @@ public class CharacterMovement : MonoBehaviour
             _animator.Play("GreatSword2");
             _isAttacking = true;
             _weaponDashCounter = 0;
+            //_currentWeaponDamage = _currentWeapon._weaponDamagePerAttack[_weaponDashCounter];
+
             Ray _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
             Plane _groundPlane = new Plane(Vector3.up, Vector3.zero);
             float _rayLength;
@@ -144,6 +152,7 @@ public class CharacterMovement : MonoBehaviour
                 transform.LookAt(_pointToLook);
                 Vector3 _pointToDash = _pointToLook - this.transform.transform.position;
                 _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
+                Debug.Log(_clampedDash);
                 //StartCoroutine(DashFromWeapon(_clampedDash, 5));
             }
         }
@@ -151,6 +160,11 @@ public class CharacterMovement : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.LeftShift))
         {
             StartCoroutine(StartDash(_offsetDirection));
+        }
+
+        if(!_isAttacking)
+        {
+            _currentWeaponDamage = 0;
         }
     }
 
@@ -181,11 +195,19 @@ public class CharacterMovement : MonoBehaviour
         }
 
         if (_weaponDashCounter < 3)
+        {
             _weaponDashCounter++;
+            //_currentWeaponDamage = _currentWeapon._weaponDamagePerAttack[_weaponDashCounter];
+        }
         else
             _weaponDashCounter = 0;
-
     }
+
+    public void RegisterWeaponDamage()
+    {
+        _currentWeaponDamage = _currentWeapon._weaponDamagePerAttack[_weaponDashCounter];
+    }
+
 
 }
 

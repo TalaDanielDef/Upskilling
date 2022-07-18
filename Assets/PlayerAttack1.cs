@@ -11,6 +11,7 @@ public class PlayerAttack1 : CharacterStateBase
         GetCharacterMovement(animator)._animationFlag = true;
         GetCharacterMovement(animator)._isAttacking = true;
         GetCharacterMovement(animator)._animationTrigger = false;
+        GetCharacterMovement(animator).RegisterWeaponDamage();
         GetCharacterMovement(animator).StartDashFromWeapon();
     }
 
