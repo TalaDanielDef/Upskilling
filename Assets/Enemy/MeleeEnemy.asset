@@ -15,5 +15,6 @@ MonoBehaviour:
   _enemyType: 0
   _playerAggroRange: 5
   _maxHP: 100
-  _timeBtwnAttacks: 0.25
-  _attackRange: 0
+  _timeBtwnAttacks: 3
+  _attackRange: 2
+  _attackPrefab: {fileID: 4750084693649447101, guid: f0cfd1daebeec2140a9f4f1762e0e866, type: 3}
