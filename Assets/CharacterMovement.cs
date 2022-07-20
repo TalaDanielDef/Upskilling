@@ -33,6 +33,7 @@ public class CharacterMovement : MonoBehaviour
     public int _weaponDashCounter = 0;
     private Vector3 _clampedDash;
     public int _currentWeaponDamage = 0;
+    public int _currentWeaponKnockback = 0;
     public enum WeaponTypes { Sword, Bow}
     private void Start()
     {
@@ -165,6 +166,7 @@ public class CharacterMovement : MonoBehaviour
         if(!_isAttacking)
         {
             _currentWeaponDamage = 0;
+            _currentWeaponKnockback = 0;
         }
     }
 
@@ -206,6 +208,7 @@ public class CharacterMovement : MonoBehaviour
     public void RegisterWeaponDamage()
     {
         _currentWeaponDamage = _currentWeapon._weaponDamagePerAttack[_weaponDashCounter];
+        _currentWeaponKnockback = _currentWeapon._weaponKnockbackPerAttack[_weaponDashCounter];
     }
 
 

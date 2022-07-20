@@ -7,38 +7,39 @@ using UnityEngine.AI;
 public class EnemyScript : MonoBehaviour
 {
     [SerializeField] private Slider _hpBar;
-    [SerializeField] private int _maxHp;
     [SerializeField] private int _currentHp;
     private NavMeshAgent _navMeshAgent;
     [SerializeField] private GameObject _player;
-    [SerializeField] private int _playerAggroRange;
     [SerializeField] private EnemyState _currentState;
-    [SerializeField] private EnemyType _enemyType;
-    [SerializeField] private float _timeBtwnAttacks;
+    //[SerializeField] private EnemyType _enemyType;
+    //[SerializeField] private float _timeBtwnAttacks;
+    [SerializeField] private EnemySO _enemySO;
+    private Rigidbody _rb;
+    private Vector3 _knockbackPos;
     public enum EnemyState { Roaming, Attack, Idle}
-    public enum EnemyType { Melee, Range}
+    private bool _isKnockback;
+    private float _attackTimer;
     private void Start()
     {
-        _currentHp = _maxHp;
+        _currentHp = _enemySO._maxHP;
         _navMeshAgent = GetComponent<NavMeshAgent>();
-        //_navMeshAgent.SetDestination(_player.transform.position);
+        _rb = GetComponent<Rigidbody>();
     }
 
     public void ReduceHP(int hpReduce)
     {
         _currentHp -= hpReduce;
-        _hpBar.value = (float)_currentHp / (float)_maxHp;
+        _hpBar.value = (float)_currentHp / (float)_enemySO._maxHP;
     }
 
     public void Update()
     {
         float _distanceToPlayer = Vector3.Distance(this.transform.position, _player.transform.position);
-        Debug.Log(_distanceToPlayer);
-        if(_playerAggroRange > _distanceToPlayer && _currentState != EnemyState.Attack)
+        //Debug.Log(_distanceToPlayer);
+        if(_enemySO._playerAggroRange > _distanceToPlayer && _currentState != EnemyState.Attack)
         {
             _currentState = EnemyState.Attack;
         }
-
         switch (_currentState)
         {
             case EnemyState.Attack:
@@ -49,11 +50,57 @@ public class EnemyScript : MonoBehaviour
             case EnemyState.Idle:
                 break;
         }
+        if(!_isKnockback)
+        {
+            _navMeshAgent.angularSpeed = 120;
+        }
+        if(_enemySO._enemyType == EnemySO.EnemyType.Melee)
+        {
+            _attackTimer += Time.deltaTime;
+            if(_enemySO._attackRange > _distanceToPlayer)
+            {
+                if(_attackTimer >= _enemySO._timeBtwnAttacks)
+                {
+                    Instantiate(_enemySO._attackPrefab, this.transform, false);
+                    _attackTimer = 0;
+                }
+            }
+        }
+    }
 
+    public void KnockBack(int knockbackPower)
+    {
+        _knockbackPos = new Vector3(0f, 0f, 0f);
+        //Vector3 _playerDifferenceToEnemy = this.transform.position - _player.transform.position;
+        //if (_playerDifferenceToEnemy.x > 0)
+        //    _knockbackPos.x = 1;
+        //if (_playerDifferenceToEnemy.x < 0)
+        //    _knockbackPos.x = -1;
+        //if (_playerDifferenceToEnemy.z > 0)
+        //    _knockbackPos.z = 1;
+        //if (_playerDifferenceToEnemy.z < 0)
+        //    _knockbackPos.z = -1;
+        _knockbackPos = _player.transform.forward;
+         Debug.Log(this.transform.position - _player.transform.position);
+        Debug.Log(_knockbackPos);
+        _navMeshAgent.angularSpeed = 0;
+        _navMeshAgent.velocity = _knockbackPos * knockbackPower;
+        _isKnockback = true;
+        StartCoroutine(StartKnockBack());
+    }
+
+    IEnumerator StartKnockBack()
+    {
+        yield return new WaitForSeconds(.75f);
+        if(!_isKnockback)
+        {
+            //_navMeshAgent.angularSpeed = 120;
+            _isKnockback = false;
+        }
     }
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawSphere(this.transform.position, _playerAggroRange);
+        Gizmos.DrawSphere(this.transform.position, _enemySO._playerAggroRange);
     }
 }

@@ -9,14 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cfc6570eb90276841b8a0e46df2f57ba, type: 3}
-  m_Name: BusterSword
+  m_Script: {fileID: 11500000, guid: 47a7909ea586a6649820869c9f011ba3, type: 3}
+  m_Name: MeleeEnemy
   m_EditorClassIdentifier: 
-  _weaponName: BusterSword
-  _weaponDashPerAttack:
-  - 0
-  - 5
-  - 10
-  _weaponDamagePerAttack: 050000000a0000000f000000
-  _weaponKnockbackPerAttack: 050000000500000005000000
-  _weaponType: 0
+  _enemyType: 0
+  _playerAggroRange: 5
+  _maxHP: 100
+  _timeBtwnAttacks: 0.25
+  _attackRange: 0
