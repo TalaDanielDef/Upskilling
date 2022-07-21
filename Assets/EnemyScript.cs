@@ -19,6 +19,7 @@ public class EnemyScript : MonoBehaviour
     public enum EnemyState { Roaming, Attack, Idle}
     private bool _isKnockback;
     private float _attackTimer;
+    [SerializeField] private GameObject _bulletPlace;
     private void Start()
     {
         _currentHp = _enemySO._maxHP;
@@ -54,18 +55,48 @@ public class EnemyScript : MonoBehaviour
         {
             _navMeshAgent.angularSpeed = 120;
         }
-        if(_enemySO._enemyType == EnemySO.EnemyType.Melee)
+
+        switch (_enemySO._enemyType)
         {
-            _attackTimer += Time.deltaTime;
-            if(_enemySO._attackRange > _distanceToPlayer)
-            {
-                if(_attackTimer >= _enemySO._timeBtwnAttacks)
+            case EnemySO.EnemyType.Melee:
+                _attackTimer += Time.deltaTime;
+                if (_enemySO._attackRange > _distanceToPlayer)
                 {
-                    Instantiate(_enemySO._attackPrefab, this.transform, false);
-                    _attackTimer = 0;
+                    if (_attackTimer >= _enemySO._timeBtwnAttacks)
+                    {
+                        Instantiate(_enemySO._attackPrefab, this.transform, false);
+                        _attackTimer = 0;
+                    }
                 }
-            }
+                break;
+            case EnemySO.EnemyType.Range:
+                _attackTimer += Time.deltaTime;
+                Debug.Log(_enemySO._attackRange);
+                Debug.Log(_distanceToPlayer);
+                if (_enemySO._attackRange > _distanceToPlayer)
+                {
+                    if (_attackTimer >= _enemySO._timeBtwnAttacks)
+                    {
+                        //Instantiate(_enemySO._attackPrefab, _bulletPlace.transform.position, Quaternion.identity);
+                        ObjectPooler._instance.SpawnFromPool("Bullet", _bulletPlace.transform.position, Quaternion.identity);
+                        _attackTimer = 0;
+                    }
+                }
+                break;
         }
+
+        //if(_enemySO._enemyType == EnemySO.EnemyType.Melee)
+        //{
+        //    _attackTimer += Time.deltaTime;
+        //    if(_enemySO._attackRange > _distanceToPlayer)
+        //    {
+        //        if(_attackTimer >= _enemySO._timeBtwnAttacks)
+        //        {
+        //            Instantiate(_enemySO._attackPrefab, this.transform, false);
+        //            _attackTimer = 0;
+        //        }
+        //    }
+        //}
     }
 
     public void KnockBack(int knockbackPower)
@@ -81,8 +112,8 @@ public class EnemyScript : MonoBehaviour
         //if (_playerDifferenceToEnemy.z < 0)
         //    _knockbackPos.z = -1;
         _knockbackPos = _player.transform.forward;
-         Debug.Log(this.transform.position - _player.transform.position);
-        Debug.Log(_knockbackPos);
+        //Debug.Log(this.transform.position - _player.transform.position);
+        //Debug.Log(_knockbackPos);
         _navMeshAgent.angularSpeed = 0;
         _navMeshAgent.velocity = _knockbackPos * knockbackPower;
         _isKnockback = true;
