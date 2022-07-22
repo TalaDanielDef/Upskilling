@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: RangeEnemy
   m_EditorClassIdentifier: 
   _enemyType: 1
-  _playerAggroRange: 5
+  _playerAggroRange: 10
   _maxHP: 100
   _timeBtwnAttacks: 2
-  _attackRange: 3
+  _attackRange: 5
   _attackPrefab: {fileID: 9074894512462801138, guid: 07241a83c728b554b80403e9c4e2af10, type: 3}
-  _stoppingRange: 0
+  _stoppingRange: 5
+  _backingRange: 3

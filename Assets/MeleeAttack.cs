@@ -5,6 +5,7 @@ using UnityEngine;
 public class MeleeAttack : MonoBehaviour
 {
     [SerializeField] private int _damageToPlayer;
+    private bool _haveDamaged = false;
 
     private void Start()
     {
@@ -15,7 +16,12 @@ public class MeleeAttack : MonoBehaviour
     {
         if(other.tag.Equals("Player"))
         {
-            other.GetComponent<CharacterHealth>().ReduceHP(_damageToPlayer);
+            if(!_haveDamaged)
+            {
+                other.GetComponent<CharacterHealth>().ReduceHP(_damageToPlayer);
+                _haveDamaged = true;
+            }
+
         }
     }
     private void OnCollisionEnter(Collision collision)

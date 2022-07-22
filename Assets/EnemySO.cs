@@ -14,4 +14,5 @@ public class EnemySO : ScriptableObject
     public float _attackRange;
     public GameObject _attackPrefab;
     public float _stoppingRange;
+    public float _backingRange;
 }

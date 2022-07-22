@@ -17,14 +17,16 @@ public class EnemyScript : MonoBehaviour
     private Rigidbody _rb;
     private Vector3 _knockbackPos;
     public enum EnemyState { Roaming, Attack, Idle}
-    private bool _isKnockback;
+    [SerializeField] private bool _isKnockback;
     private float _attackTimer;
     [SerializeField] private GameObject _bulletPlace;
+    private float _multiplier = 1;
     private void Start()
     {
         _currentHp = _enemySO._maxHP;
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _rb = GetComponent<Rigidbody>();
+        _navMeshAgent.stoppingDistance = _enemySO._stoppingRange;
     }
 
     public void ReduceHP(int hpReduce)
@@ -44,7 +46,7 @@ public class EnemyScript : MonoBehaviour
         switch (_currentState)
         {
             case EnemyState.Attack:
-                _navMeshAgent.SetDestination(_player.transform.position);
+                //_navMeshAgent.SetDestination(_player.transform.position);
                 break;
             case EnemyState.Roaming:
                 break;
@@ -62,7 +64,7 @@ public class EnemyScript : MonoBehaviour
                 _attackTimer += Time.deltaTime;
                 if (_enemySO._attackRange > _distanceToPlayer)
                 {
-                    if (_attackTimer >= _enemySO._timeBtwnAttacks)
+                    if (_attackTimer >= _enemySO._timeBtwnAttacks && !_isKnockback)
                     {
                         Instantiate(_enemySO._attackPrefab, this.transform, false);
                         _attackTimer = 0;
@@ -71,13 +73,14 @@ public class EnemyScript : MonoBehaviour
                 break;
             case EnemySO.EnemyType.Range:
                 _attackTimer += Time.deltaTime;
-                Debug.Log(_enemySO._attackRange);
-                Debug.Log(_distanceToPlayer);
+                //Debug.Log(_enemySO._attackRange);
+                //Debug.Log(_distanceToPlayer);
                 if (_enemySO._attackRange > _distanceToPlayer)
                 {
-                    if (_attackTimer >= _enemySO._timeBtwnAttacks)
+                    if (_attackTimer >= _enemySO._timeBtwnAttacks && !_isKnockback)
                     {
                         //Instantiate(_enemySO._attackPrefab, _bulletPlace.transform.position, Quaternion.identity);
+                        this.transform.LookAt(_player.transform);
                         ObjectPooler._instance.SpawnFromPool("Bullet", _bulletPlace.transform.position, Quaternion.identity);
                         _attackTimer = 0;
                     }
@@ -85,6 +88,55 @@ public class EnemyScript : MonoBehaviour
                 break;
         }
 
+        if(_enemySO._backingRange > _distanceToPlayer)
+        {
+            Vector3 _dirToPlayer = transform.position - _player.transform.position;
+            Vector3 _minimizedDirection = new Vector3(0f, 0f, 0f);
+
+            Debug.Log(_dirToPlayer.x);
+            Debug.Log(_dirToPlayer.z);
+            if (_dirToPlayer.x > 0)
+                _minimizedDirection.x = 1;
+            if (_dirToPlayer.x < 0)
+                _minimizedDirection.x = -1;
+            if (_dirToPlayer.z > 0)
+                _minimizedDirection.z = 1;
+            if (_dirToPlayer.z < 0)
+                _minimizedDirection.z = -1;
+
+            Debug.Log(_minimizedDirection);
+            //if (_dirToPlayer.magnitude > 0.5)
+            //{
+            //    _multiplier = 50;
+            //}
+            //else if (_dirToPlayer.magnitude > 1)
+            //{
+            //    _multiplier = 10;
+            //}
+            //else if(_dirToPlayer.magnitude > 1.5)
+            //{
+            //    _multiplier = 7;
+            //}
+            //else if(_dirToPlayer.magnitude > 2.5)
+            //{
+            //    _multiplier = 5;
+            //}
+            //else
+            //{
+            //    _multiplier = 1;
+            //}
+
+            Vector3 _newPos = transform.position + _minimizedDirection * _multiplier;
+
+            //Debug.Log(_newPos);
+            _navMeshAgent.stoppingDistance = 0;
+            _navMeshAgent.SetDestination(_newPos);
+        }
+        else if(_enemySO._playerAggroRange > _distanceToPlayer )
+        {
+            _navMeshAgent.stoppingDistance = _enemySO._stoppingRange;
+            _navMeshAgent.SetDestination(_player.transform.position);   
+        }
         //if(_enemySO._enemyType == EnemySO.EnemyType.Melee)
         //{
         //    _attackTimer += Time.deltaTime;
@@ -116,14 +168,16 @@ public class EnemyScript : MonoBehaviour
         //Debug.Log(_knockbackPos);
         _navMeshAgent.angularSpeed = 0;
         _navMeshAgent.velocity = _knockbackPos * knockbackPower;
+        
         _isKnockback = true;
+        StopAllCoroutines();
         StartCoroutine(StartKnockBack());
     }
 
     IEnumerator StartKnockBack()
     {
         yield return new WaitForSeconds(.75f);
-        if(!_isKnockback)
+        if(_isKnockback)
         {
             //_navMeshAgent.angularSpeed = 120;
             _isKnockback = false;

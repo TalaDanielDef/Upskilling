@@ -3156,6 +3156,7 @@ MonoBehaviour:
   _player: {fileID: 104873216}
   _currentState: 0
   _enemySO: {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+  _isKnockback: 0
   _bulletPlace: {fileID: 1881389504}
 --- !u!54 &1716530446
 Rigidbody:
@@ -3200,7 +3201,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 2
+  m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
