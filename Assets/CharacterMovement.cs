@@ -54,8 +54,7 @@ public class CharacterMovement : MonoBehaviour
         {
             _velocity.y = -2f;
         }
-        //float _horizontal = Input.GetAxisRaw("Horizontal");
-        //float _vertical = Input.GetAxisRaw("Vertical");
+
         Vector2 _direction = _inputActions.ReadValue<Vector2>();
         Vector3 _fixedDirection = new Vector3(_direction.x, 0f, _direction.y);
         Vector3 _offsetDirection = new Vector3(0f, 0f, 0f);
@@ -117,10 +116,8 @@ public class CharacterMovement : MonoBehaviour
                 {
                     Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
                     transform.LookAt(_pointToLook);
-                    Vector3 _pointToDash = _pointToLook - this.transform.transform.position;
+                    Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
                     _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
-                    Debug.Log(_clampedDash);
-                    //StartCoroutine(DashFromWeapon(_clampedDash, 5));
                 }
                 if(_weaponDashCounter == 3)
                 {
@@ -133,15 +130,13 @@ public class CharacterMovement : MonoBehaviour
                 _animator.SetBool("BackToMove", true);
             }
         }
-        //Debug.Log("Animation Flag: " + _animationFlag);
-        //Debug.Log(_animationTrigger);
+
 
         if(Input.GetMouseButtonDown(0) && !_isAttacking)
         {
             _animator.Play("GreatSword2");
             _isAttacking = true;
             _weaponDashCounter = 0;
-            //_currentWeaponDamage = _currentWeapon._weaponDamagePerAttack[_weaponDashCounter];
 
             Ray _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
             Plane _groundPlane = new Plane(Vector3.up, Vector3.zero);
@@ -151,10 +146,9 @@ public class CharacterMovement : MonoBehaviour
             {
                 Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
                 transform.LookAt(_pointToLook);
-                Vector3 _pointToDash = _pointToLook - this.transform.transform.position;
+                Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
                 _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
                 Debug.Log(_clampedDash);
-                //StartCoroutine(DashFromWeapon(_clampedDash, 5));
             }
         }
 
@@ -199,7 +193,6 @@ public class CharacterMovement : MonoBehaviour
         if (_weaponDashCounter < 3)
         {
             _weaponDashCounter++;
-            //_currentWeaponDamage = _currentWeapon._weaponDamagePerAttack[_weaponDashCounter];
         }
         else
             _weaponDashCounter = 0;

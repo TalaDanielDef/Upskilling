@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _weaponName: BusterSword
   _weaponDashPerAttack:
-  - 0
+  - 5
   - 5
   - 10
   _weaponDamagePerAttack: 050000000a0000000f000000
