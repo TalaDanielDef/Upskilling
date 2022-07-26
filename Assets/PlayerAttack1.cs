@@ -8,25 +8,25 @@ public class PlayerAttack1 : CharacterStateBase
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         animator.SetBool("BackToMove", true);
-        GetCharacterMovement(animator)._animationFlag = true;
-        GetCharacterMovement(animator)._isAttacking = true;
-        GetCharacterMovement(animator)._animationTrigger = false;
-        GetCharacterMovement(animator).RegisterWeaponDamage();
-        GetCharacterMovement(animator).StartDashFromWeapon();
+        GetCharacterCombat(animator)._animationFlag = true;
+        GetCharacterCombat(animator)._isAttacking = true;
+        GetCharacterCombat(animator)._animationTrigger = false;
+        GetCharacterCombat(animator).RegisterWeaponDamage();
+        GetCharacterCombat(animator).StartDashFromWeapon();
     }
 
     //OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
 
-        GetCharacterMovement(animator)._isAttacking = true;
+        GetCharacterCombat(animator)._isAttacking = true;
     }
 
     //OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
 
-        GetCharacterMovement(animator)._isAttacking = false;
+        GetCharacterCombat(animator)._isAttacking = false;
         //GetCharacterMovement(animator)._animationFlag = false;
     }
 

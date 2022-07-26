@@ -24,7 +24,7 @@ public class BulletScript : MonoBehaviour, IPooledObject
 
         if (other.tag.Equals("PlayerSword"))
         {
-            if(_player.GetComponent<CharacterMovement>()._isAttacking)
+            if(_player.GetComponent<CharacterCombat>()._isAttacking)
             {
                 this.gameObject.SetActive(false);
             }

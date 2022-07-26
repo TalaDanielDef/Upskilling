@@ -20,24 +20,15 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] private LayerMask _groundMask;
     private Vector3 _velocity;
     private bool _isGrounded;
-    public bool _animationFlag = false;
-    public bool _animationTrigger = false;
-    public bool _isAttacking = false;
-    [SerializeField] private float _dashSpeed;
-    [SerializeField] private float _dashTime;
     [SerializeField] private GameObject _dashTrailObject;
     private int _rotateSpeedHolder;
-    [SerializeField] private Camera _mainCamera;
-    [SerializeField] private WeaponTypes _currentWeaponType;
-    [SerializeField] private WeaponSO _currentWeapon;
-    public int _weaponDashCounter = 0;
-    private Vector3 _clampedDash;
-    public int _currentWeaponDamage = 0;
-    public int _currentWeaponKnockback = 0;
-    public enum WeaponTypes { Sword, Bow}
+    private Vector3 _fixedDirection;
+    private Vector3 _offsetDirection;
+    private CharacterCombat _characterCombat; 
     private void Start()
     {
         _rotateSpeedHolder = _rotateSpeed;
+        _characterCombat = GetComponent<CharacterCombat>();
     }
     private void OnEnable()
     {
@@ -50,20 +41,20 @@ public class CharacterMovement : MonoBehaviour
     void Update()
     {
         _isGrounded = Physics.CheckSphere(_groundCheck.position, _groundDistance, _groundMask);
-        if(_isGrounded && _velocity.y < 0)
+        if (_isGrounded && _velocity.y < 0)
         {
             _velocity.y = -2f;
         }
 
         Vector2 _direction = _inputActions.ReadValue<Vector2>();
-        Vector3 _fixedDirection = new Vector3(_direction.x, 0f, _direction.y);
-        Vector3 _offsetDirection = new Vector3(0f, 0f, 0f);
+        _fixedDirection = new Vector3(_direction.x, 0f, _direction.y);
+        _offsetDirection = new Vector3(0f, 0f, 0f);
 
         if (_direction.x == 0 && _direction.y < 0)
             _offsetDirection = new Vector3(-1f, 0f, -1f);
         if (_direction.x < 0f && _direction.y < 0f)
             _offsetDirection = new Vector3(-1f, 0f, 0f);
-        if(_direction.x < 0 && _direction.y == 0)
+        if (_direction.x < 0 && _direction.y == 0)
             _offsetDirection = new Vector3(-1f, 0f, 1f);
         if (_direction.x < 0f && _direction.y > 0f)
             _offsetDirection = new Vector3(0f, 0f, 1f);
@@ -76,7 +67,7 @@ public class CharacterMovement : MonoBehaviour
         if (_direction.x > 0f && _direction.y < 0f)
             _offsetDirection = new Vector3(0f, 0f, -1f);
 
-        if(_isAttacking)
+        if (_characterCombat._isAttacking)
         {
             _offsetDirection = new Vector3(0f, 0f, 0f);
             _rotateSpeed = 0;
@@ -86,7 +77,7 @@ public class CharacterMovement : MonoBehaviour
             _rotateSpeed = _rotateSpeedHolder;
         }
 
-        if(_fixedDirection.magnitude > 0.2f)
+        if (_fixedDirection.magnitude > 0.2f)
         {
             transform.rotation = Quaternion.Lerp(_staticRotation.transform.rotation, Quaternion.LookRotation(_fixedDirection) * Quaternion.Euler(0f, 45f, 0f), Time.deltaTime * _rotateSpeed);
         }
@@ -94,116 +85,17 @@ public class CharacterMovement : MonoBehaviour
         _animator.SetFloat("MoveSpeed", _offsetDirection.magnitude);
 
 
-        if(_offsetDirection.magnitude >= 0.1f)
+        if (_offsetDirection.magnitude >= 0.1f)
         {
             _characterController.Move(_offsetDirection * _characterSpeed * Time.deltaTime);
         }
 
         _velocity.y += _gravity * Time.deltaTime;
         _characterController.Move(_velocity * Time.deltaTime);
-
-        if(_animationFlag)
-        {
-            if(Input.GetMouseButtonDown(0))
-            {
-                _animator.SetBool("BackToMove", false);
-                _animationTrigger = true;
-                Ray _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
-                Plane _groundPlane = new Plane(Vector3.up, Vector3.zero);
-                float _rayLength;
-
-                if (_groundPlane.Raycast(_cameraRay, out _rayLength))
-                {
-                    Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
-                    transform.LookAt(_pointToLook);
-                    Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
-                    _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
-                }
-                if(_weaponDashCounter == 3)
-                {
-                    _weaponDashCounter = 0;
-                }
-                
-            }
-            else if(!_animationTrigger)
-            {
-                _animator.SetBool("BackToMove", true);
-            }
-        }
-
-
-        if(Input.GetMouseButtonDown(0) && !_isAttacking)
-        {
-            _animator.Play("GreatSword2");
-            _isAttacking = true;
-            _weaponDashCounter = 0;
-
-            Ray _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
-            Plane _groundPlane = new Plane(Vector3.up, Vector3.zero);
-            float _rayLength;
-
-            if (_groundPlane.Raycast(_cameraRay, out _rayLength))
-            {
-                Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
-                transform.LookAt(_pointToLook);
-                Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
-                _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
-                Debug.Log(_clampedDash);
-            }
-        }
-
-        if(Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            StartCoroutine(StartDash(_offsetDirection));
-        }
-
-        if(!_isAttacking)
-        {
-            _currentWeaponDamage = 0;
-            _currentWeaponKnockback = 0;
-        }
-    }
-
-    IEnumerator StartDash(Vector3 offsetDirection)
-    {
-        float _startTime = Time.time;
-        //_dashTrailObject.SetActive(true);
-        _dashTrailObject.GetComponent<TrailRenderer>().emitting = true;
-        while (Time.time < _startTime + _dashTime)
-        {
-            _characterController.Move(offsetDirection * _dashSpeed * Time.deltaTime);
-            yield return null;
-        }
-        _dashTrailObject.GetComponent<TrailRenderer>().emitting = false;
-    }
-
-    public void StartDashFromWeapon()
-    {
-        StartCoroutine(DashFromWeapon());
-    }
-    IEnumerator DashFromWeapon()
-    {
-        float _startTime = Time.time;
-        while (Time.time < _startTime + _dashTime)
-        {
-            _characterController.Move(_clampedDash * _currentWeapon._weaponDashPerAttack[_weaponDashCounter] * Time.deltaTime);
-            yield return null;
-        }
-
-        if (_weaponDashCounter < 3)
-        {
-            _weaponDashCounter++;
-        }
-        else
-            _weaponDashCounter = 0;
-    }
-
-    public void RegisterWeaponDamage()
-    {
-        _currentWeaponDamage = _currentWeapon._weaponDamagePerAttack[_weaponDashCounter];
-        _currentWeaponKnockback = _currentWeapon._weaponKnockbackPerAttack[_weaponDashCounter];
     }
 
 
+    public Vector3 PFixedDirection { get { return _fixedDirection; } }
+    public Vector3 POffsetDirection { get { return _offsetDirection; } }
 }
 

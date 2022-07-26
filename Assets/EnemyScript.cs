@@ -115,8 +115,6 @@ public class EnemyScript : MonoBehaviour
 
 
             Vector3 _newPos = transform.position + _minimizedDirection * _multiplier;
-
-            //Debug.Log(_newPos);
             _navMeshAgent.stoppingDistance = 0;
             _navMeshAgent.SetDestination(_newPos);
         }
@@ -129,15 +127,12 @@ public class EnemyScript : MonoBehaviour
 
     IEnumerator Shoot()
     {
-        Debug.Log("Shoot");
         _isDoneShooting = true;
         yield return new WaitForSeconds(_timerToShoot);
-        Debug.Log("FinishShoot");
         ObjectPooler._instance.SpawnFromPool("Bullet", _bulletPlace.transform.position, Quaternion.identity);
         _isDoneShooting = false;
         _attackTimer = 0;
         _isShooting = false;
-        //Debug.Log("FinishShoot");
     }
 
     public void KnockBack(int knockbackPower)
@@ -163,6 +158,6 @@ public class EnemyScript : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.DrawSphere(this.transform.position, _enemySO._playerAggroRange);
+        //Gizmos.DrawSphere(this.transform.position, _enemySO._playerAggroRange);
     }
 }

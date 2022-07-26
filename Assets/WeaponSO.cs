@@ -10,6 +10,6 @@ public class WeaponSO : ScriptableObject
     public int[] _weaponDamagePerAttack;
     public int[] _weaponKnockbackPerAttack;
     // float[] _weapon
-    public CharacterMovement.WeaponTypes _weaponType;
+    public CharacterCombat.WeaponTypes _weaponType;
 
 }

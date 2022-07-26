@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class CharacterStateBase : StateMachineBehaviour
 {
-    private CharacterMovement _characterMovement;
-    public CharacterMovement GetCharacterMovement(Animator animator)
+    private CharacterCombat _characterCombat;
+    public CharacterCombat GetCharacterCombat(Animator animator)
     {
-        if(_characterMovement == null)
+        if(_characterCombat == null)
         {
-            _characterMovement = animator.GetComponentInParent<CharacterMovement>();
+            _characterCombat = animator.GetComponentInParent<CharacterCombat>();
         }
 
-        return _characterMovement;
+        return _characterCombat;
     }
 }
