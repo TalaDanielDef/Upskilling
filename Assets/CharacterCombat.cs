@@ -26,83 +26,133 @@ public class CharacterCombat : MonoBehaviour
     [SerializeField] private float _rateOfResize;
     [SerializeField] private float _rangeBow;
     [SerializeField] private float _rateOfBow;
-
+    [SerializeField] private GameObject _swordWeapon;
+    [SerializeField] private GameObject _bowWeapon;
+    private bool _drawBow = false;
     // Start is called before the first frame update
     void Start()
     {
         _characterMovement = GetComponent<CharacterMovement>();
         _characterController = GetComponent<CharacterController>();
+        if(_currentWeapon._weaponType == WeaponTypes.Sword)
+        {
+            _animator.SetBool("IsBow", false);
+            _animator.Play("Dummy");
+        }
+        else if(_currentWeapon._weaponType == WeaponTypes.Bow)
+        {
+            _animator.SetBool("IsBow", true);
+            _animator.Play("Dummy");
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        if (_animationFlag)
+        switch (_currentWeaponType)
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                _animator.SetBool("BackToMove", false);
-                _animationTrigger = true;
-                Ray _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
-                Plane _groundPlane = new Plane(Vector3.up, Vector3.zero);
-                float _rayLength;
-
-                if (_groundPlane.Raycast(_cameraRay, out _rayLength))
+            case WeaponTypes.Sword:
                 {
-                    Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
-                    transform.LookAt(_pointToLook);
-                    Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
-                    _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
+                    if(!_swordWeapon.activeSelf)
+                    {
+                        _swordWeapon.SetActive(true);
+                    }
+                    if(_bowWeapon.activeSelf)
+                    {
+                        _bowWeapon.SetActive(false);
+                    }
+
+                    if (_animationFlag)
+                    {
+                        if (Input.GetMouseButtonDown(0))
+                        {
+                            _animator.SetBool("BackToMove", false);
+                            _animationTrigger = true;
+                            Ray _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
+                            Plane _groundPlane = new Plane(Vector3.up, Vector3.zero);
+                            float _rayLength;
+
+                            if (_groundPlane.Raycast(_cameraRay, out _rayLength))
+                            {
+                                Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
+                                transform.LookAt(_pointToLook);
+                                Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
+                                _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
+                            }
+                            if (_weaponDashCounter == 3)
+                            {
+                                _weaponDashCounter = 0;
+                            }
+
+                        }
+                        else if (!_animationTrigger)
+                        {
+                            _animator.SetBool("BackToMove", true);
+                        }
+                    }
+
+                    if (Input.GetMouseButtonDown(0) && !_isAttacking)
+                    {
+                        _animator.Play("GreatSword2");
+                        _isAttacking = true;
+                        _weaponDashCounter = 0;
+
+                        Ray _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
+                        Plane _groundPlane = new Plane(Vector3.up, Vector3.zero);
+                        float _rayLength;
+
+                        if (_groundPlane.Raycast(_cameraRay, out _rayLength))
+                        {
+                            Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
+                            transform.LookAt(_pointToLook);
+                            Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
+                            _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
+                            Debug.Log(_clampedDash);
+                        }
+                    }
+
+                    if (Input.GetKeyDown(KeyCode.LeftShift))
+                    {
+                        StartCoroutine(StartDash(_characterMovement.POffsetDirection));
+                    }
+
+                    if (!_isAttacking)
+                    {
+                        _currentWeaponDamage = 0;
+                        _currentWeaponKnockback = 0;
+                    }
+                    break;
                 }
-                if (_weaponDashCounter == 3)
+            case WeaponTypes.Bow:
                 {
-                    _weaponDashCounter = 0;
+                    if(!_bowWeapon.activeSelf)
+                    {
+                        _bowWeapon.SetActive(true);
+                    }
+                    if(_swordWeapon.activeSelf)
+                    {
+                        _swordWeapon.SetActive(false);
+                    }
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        _animator.Play("Standing Draw Arrow");
+                    }
+                    if (Input.GetMouseButton(0))
+                    {
+                        _arrow.gameObject.GetComponent<RectTransform>().sizeDelta += new Vector2(1, 0) * Time.deltaTime * _rateOfResize;
+                        _rangeBow += 1f * Time.deltaTime * _rateOfBow;
+                        Debug.Log(_arrow.gameObject.GetComponent<RectTransform>().sizeDelta);
+                    }
+                    if (Input.GetMouseButtonUp(0))
+                    {
+                        _animator.Play("Standing Aim Recoil");
+                    }
+                    break;
                 }
-
-            }
-            else if (!_animationTrigger)
-            {
-                _animator.SetBool("BackToMove", true);
-            }
         }
 
-        if(Input.GetMouseButton(0))
-        {
-            _arrow.gameObject.GetComponent<RectTransform>().sizeDelta += new Vector2(1, 0) * Time.deltaTime * _rateOfResize;
-            _rangeBow += 1f * Time.deltaTime * _rateOfBow;
-            Debug.Log(_arrow.gameObject.GetComponent<RectTransform>().sizeDelta);
-        }
-        if (Input.GetMouseButtonDown(0) && !_isAttacking)
-        {
-            _animator.Play("GreatSword2");
-            _isAttacking = true;
-            _weaponDashCounter = 0;
 
-            Ray _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
-            Plane _groundPlane = new Plane(Vector3.up, Vector3.zero);
-            float _rayLength;
 
-            if (_groundPlane.Raycast(_cameraRay, out _rayLength))
-            {
-                Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
-                transform.LookAt(_pointToLook);
-                Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
-                _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
-                Debug.Log(_clampedDash);
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            StartCoroutine(StartDash(_characterMovement.POffsetDirection));
-        }
-
-        if (!_isAttacking)
-        {
-            _currentWeaponDamage = 0;
-            _currentWeaponKnockback = 0;
-        }
     }
     IEnumerator StartDash(Vector3 offsetDirection)
     {
