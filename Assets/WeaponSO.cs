@@ -9,6 +9,8 @@ public class WeaponSO : ScriptableObject
     public float[] _weaponDashPerAttack;
     public int[] _weaponDamagePerAttack;
     public int[] _weaponKnockbackPerAttack;
+    public float _bowRange;
+    public GameObject _arrowPrefab;
     // float[] _weapon
     public CharacterCombat.WeaponTypes _weaponType;
 

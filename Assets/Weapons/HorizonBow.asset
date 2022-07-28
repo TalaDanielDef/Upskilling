@@ -16,4 +16,6 @@ MonoBehaviour:
   _weaponDashPerAttack: []
   _weaponDamagePerAttack: 
   _weaponKnockbackPerAttack: 
+  _bowRange: 15
+  _arrowPrefab: {fileID: 429521174692036216, guid: c021c3f95f18afe4080896f8922f8f04, type: 3}
   _weaponType: 1

@@ -2,32 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAttack1 : CharacterStateBase
+public class PlayerAttackBow : CharacterStateBase
 {
-    //OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
+    // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        animator.SetBool("BackToMove", true);
-        GetCharacterCombat(animator)._animationFlag = true;
-        GetCharacterCombat(animator)._isAttacking = true;
-        GetCharacterCombat(animator)._animationTrigger = false;
-        GetCharacterCombat(animator).RegisterWeaponDamage();
-        GetCharacterCombat(animator).StartDashFromWeapon();
+        //GetCharacterCombat(animator)._finishDrawBow = false;
     }
 
-    //OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
-    override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-
-        GetCharacterCombat(animator)._isAttacking = true;
-    }
+    // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
+    //override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    //{
+    //    
+    //}
 
     //OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-
-        GetCharacterCombat(animator)._isAttacking = false;
-        //GetCharacterMovement(animator)._animationFlag = false;
+        Debug.Log("Test");
+        //GetCharacterCombat(animator)._finishDrawBow = true;
     }
 
     // OnStateMove is called right after Animator.OnAnimatorMove()
