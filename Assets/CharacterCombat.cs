@@ -35,8 +35,9 @@ public class CharacterCombat : MonoBehaviour
     private Ray _cameraRay;
     private Plane _groundPlane;
     [SerializeField] private GameObject _middleArrowPos;
-    private Vector2 _initialValueGuideArrow;
-    private float _initialRangeBow;
+    private Vector2 _initialValueGuideArrow = new Vector2(0,0);
+    private float _initialRangeBow = 0;
+    [SerializeField] private WeaponSO _swordSO, _bowSO;
     // Start is called before the first frame update
     void Start()
     {
@@ -52,14 +53,16 @@ public class CharacterCombat : MonoBehaviour
             _animator.SetBool("IsBow", true);
             _animator.Play("Dummy");
         }
+        if(_initialValueGuideArrow == new Vector2(0,0))
         _initialValueGuideArrow = _arrow.gameObject.GetComponent<RectTransform>().sizeDelta;
+        if(_initialRangeBow == 0)
         _initialRangeBow = _rangeBow;
     }
 
     // Update is called once per frame
     void Update()
     {
-        switch (_currentWeaponType)
+        switch (_currentWeapon._weaponType)
         {
             case WeaponTypes.Sword:
                 {
@@ -280,5 +283,19 @@ public class CharacterCombat : MonoBehaviour
     {
         Debug.Log("End Draw Bow");
         _finishDrawBow = true;
+    }
+
+    public void SwapWeapon()
+    {
+        if (_currentWeapon._weaponType == WeaponTypes.Bow)
+        {
+            _currentWeapon = _swordSO;
+            Start();
+        }
+        else if (_currentWeapon._weaponType == WeaponTypes.Sword)
+        {
+            _currentWeapon = _bowSO;
+            Start();
+        }
     }
 }

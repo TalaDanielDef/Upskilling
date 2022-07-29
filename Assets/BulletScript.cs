@@ -22,12 +22,22 @@ public class BulletScript : MonoBehaviour, IPooledObject
             }
         }
 
-        if (other.tag.Equals("PlayerSword"))
+        else if (other.tag.Equals("PlayerSword"))
         {
             if(_player.GetComponent<CharacterCombat>()._isAttacking)
             {
                 this.gameObject.SetActive(false);
             }
+        }
+
+        else if (other.tag.Equals("Arrow"))
+        {
+            this.gameObject.SetActive(false);
+        }
+
+        else
+        {
+            this.gameObject.SetActive(false);
         }
 
         //wall SetActiveFalse

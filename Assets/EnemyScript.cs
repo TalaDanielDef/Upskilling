@@ -22,42 +22,102 @@ public class EnemyScript : MonoBehaviour
     private float _attackTimer;
     [SerializeField] private GameObject _bulletPlace;
     private float _multiplier = 1;
-    public Transform target;
     public float turnSpeed = .01f;
     Quaternion rotGoal;
     Vector3 direction;
     [SerializeField] private bool _isShooting = false;
     [SerializeField] private float _timerToShoot;
     [SerializeField] private bool _isDoneShooting = false;
-
+    [SerializeField] private float _roamTimer;
+    [SerializeField] private float _roamRadius;
+    private float _currentRoamTimer = 0;
+    private bool _isHit = false;
     private void Start()
     {
         _currentHp = _enemySO._maxHP;
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _rb = GetComponent<Rigidbody>();
         _navMeshAgent.stoppingDistance = _enemySO._stoppingRange;
+        _player = GameObject.FindGameObjectWithTag("Player");
     }
 
     public void ReduceHP(int hpReduce)
     {
+        _isHit = true;
         _currentHp -= hpReduce;
         _hpBar.value = (float)_currentHp / (float)_enemySO._maxHP;
+
+        if(_currentHp <= 0)
+        {
+            WaveSpawner.PInstance.PEnemyCount--;
+            WaveSpawner.PInstance.HaveEnemies();
+            Destroy(this.gameObject);
+        }
     }
 
     public void Update()
     {
         float _distanceToPlayer = Vector3.Distance(this.transform.position, _player.transform.position);
         //Debug.Log(_distanceToPlayer);
-        if(_enemySO._playerAggroRange > _distanceToPlayer && _currentState != EnemyState.Attack)
+        if((_enemySO._playerAggroRange > _distanceToPlayer && _currentState != EnemyState.Attack) || _isHit)
         {
             _currentState = EnemyState.Attack;
+        }
+
+        if(_enemySO._playerAggroRange < _distanceToPlayer && _currentState != EnemyState.Roaming && !_isHit)
+        {
+            _currentState = EnemyState.Roaming;
         }
         switch (_currentState)
         {
             case EnemyState.Attack:
                 //_navMeshAgent.SetDestination(_player.transform.position);
+                if(_navMeshAgent.stoppingDistance == 0)
+                {
+                    _navMeshAgent.stoppingDistance = _enemySO._stoppingRange;
+                }
+                switch (_enemySO._enemyType)
+                {
+                    case EnemySO.EnemyType.Melee:
+                        _attackTimer += Time.deltaTime;
+                        if (_enemySO._attackRange > _distanceToPlayer)
+                        {
+                            if (_attackTimer >= _enemySO._timeBtwnAttacks && !_isKnockback)
+                            {
+                                Instantiate(_enemySO._attackPrefab, this.transform, false);
+                                _attackTimer = 0;
+                            }
+                        }
+                        break;
+                    case EnemySO.EnemyType.Range:
+                        _attackTimer += Time.deltaTime;
+                        if (_enemySO._attackRange > _distanceToPlayer)
+                        {
+                            if (_attackTimer >= _enemySO._timeBtwnAttacks && !_isKnockback)
+                            {
+                                direction = (_player.transform.position - transform.position).normalized;
+                                rotGoal = Quaternion.LookRotation(direction);
+                                transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, turnSpeed);
+                                _isShooting = true;
+                                if (!_isDoneShooting)
+                                {
+                                    StartCoroutine(Shoot());
+                                }
+                            }
+                        }
+                        break;
+                }
                 break;
             case EnemyState.Roaming:
+                _navMeshAgent.stoppingDistance = 0;
+                _currentRoamTimer += Time.deltaTime;
+                if(_currentRoamTimer >= _roamTimer)
+                {
+                    _navMeshAgent.SetDestination(FindRoamDestination(_roamRadius));
+
+                    Debug.Log("Found");
+                    _currentRoamTimer = 0;
+                }
                 break;
             case EnemyState.Idle:
                 break;
@@ -67,37 +127,37 @@ public class EnemyScript : MonoBehaviour
             _navMeshAgent.angularSpeed = 200;
         }
 
-        switch (_enemySO._enemyType)
-        {
-            case EnemySO.EnemyType.Melee:
-                _attackTimer += Time.deltaTime;
-                if (_enemySO._attackRange > _distanceToPlayer)
-                {
-                    if (_attackTimer >= _enemySO._timeBtwnAttacks && !_isKnockback)
-                    {
-                        Instantiate(_enemySO._attackPrefab, this.transform, false);
-                        _attackTimer = 0;
-                    }
-                }
-                break;
-            case EnemySO.EnemyType.Range:
-                _attackTimer += Time.deltaTime;
-                if (_enemySO._attackRange > _distanceToPlayer)
-                {
-                    if (_attackTimer >= _enemySO._timeBtwnAttacks && !_isKnockback)
-                    {
-                        direction = (target.position - transform.position).normalized;
-                        rotGoal = Quaternion.LookRotation(direction);
-                        transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, turnSpeed);
-                        _isShooting = true;
-                        if(!_isDoneShooting)
-                        {
-                            StartCoroutine(Shoot());
-                        }
-                    }
-                }
-                break;
-        }
+        //switch (_enemySO._enemyType)
+        //{
+        //    case EnemySO.EnemyType.Melee:
+        //        _attackTimer += Time.deltaTime;
+        //        if (_enemySO._attackRange > _distanceToPlayer)
+        //        {
+        //            if (_attackTimer >= _enemySO._timeBtwnAttacks && !_isKnockback)
+        //            {
+        //                Instantiate(_enemySO._attackPrefab, this.transform, false);
+        //                _attackTimer = 0;
+        //            }
+        //        }
+        //        break;
+        //    case EnemySO.EnemyType.Range:
+        //        _attackTimer += Time.deltaTime;
+        //        if (_enemySO._attackRange > _distanceToPlayer)
+        //        {
+        //            if (_attackTimer >= _enemySO._timeBtwnAttacks && !_isKnockback)
+        //            {
+        //                direction = (target.position - transform.position).normalized;
+        //                rotGoal = Quaternion.LookRotation(direction);
+        //                transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, turnSpeed);
+        //                _isShooting = true;
+        //                if(!_isDoneShooting)
+        //                {
+        //                    StartCoroutine(Shoot());
+        //                }
+        //            }
+        //        }
+        //        break;
+        //}
 
         if(_enemySO._backingRange > _distanceToPlayer && !_isShooting)
         {
@@ -118,7 +178,7 @@ public class EnemyScript : MonoBehaviour
             _navMeshAgent.stoppingDistance = 0;
             _navMeshAgent.SetDestination(_newPos);
         }
-        else if(_enemySO._playerAggroRange > _distanceToPlayer )
+        else if((_enemySO._playerAggroRange > _distanceToPlayer) || _isHit)
         {
             _navMeshAgent.stoppingDistance = _enemySO._stoppingRange;
             _navMeshAgent.SetDestination(_player.transform.position);   
@@ -135,6 +195,23 @@ public class EnemyScript : MonoBehaviour
         _isShooting = false;
     }
 
+    public Vector3 FindRoamDestination(float radius)
+    {
+        Vector3 _finalPosition = Vector3.zero;
+        while(_finalPosition == Vector3.zero)
+        {
+            Vector3 _randomDirection = UnityEngine.Random.insideUnitSphere * radius;
+            _randomDirection += transform.position;
+            NavMeshHit _hit;
+
+            if(NavMesh.SamplePosition(_randomDirection, out _hit, radius, 1))
+            {
+                _finalPosition = _hit.position;
+            }
+        }
+        Debug.Log(_finalPosition);
+        return _finalPosition;
+    }
     public void KnockBack(int knockbackPower)
     {
         _knockbackPos = new Vector3(0f, 0f, 0f);
@@ -160,4 +237,6 @@ public class EnemyScript : MonoBehaviour
     {
         //Gizmos.DrawSphere(this.transform.position, _enemySO._playerAggroRange);
     }
+
+    public EnemySO PEnemySO { set { _enemySO = value; } }
 }

@@ -17,6 +17,8 @@ MonoBehaviour:
   - 5
   - 5
   - 10
-  _weaponDamagePerAttack: 050000000a0000000f000000
+  _weaponDamagePerAttack: 14000000190000001e000000
   _weaponKnockbackPerAttack: 050000000500000005000000
+  _bowRange: 0
+  _arrowPrefab: {fileID: 0}
   _weaponType: 0

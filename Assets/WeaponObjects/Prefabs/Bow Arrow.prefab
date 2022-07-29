@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 429521174692067544}
   m_Layer: 0
   m_Name: Bow Arrow
-  m_TagString: Untagged
+  m_TagString: Arrow
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -76,8 +76,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bedf945031f7954db23ba5134ad6e88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _arrowDamage: 10
-  _arrowSpeed: 20
+  _arrowDamage: 20
+  _arrowSpeed: 25
 --- !u!1 &429521174692036218
 GameObject:
   m_ObjectHideFlags: 0
