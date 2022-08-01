@@ -114,8 +114,6 @@ public class EnemyScript : MonoBehaviour
                 if(_currentRoamTimer >= _roamTimer)
                 {
                     _navMeshAgent.SetDestination(FindRoamDestination(_roamRadius));
-
-                    Debug.Log("Found");
                     _currentRoamTimer = 0;
                 }
                 break;
@@ -209,7 +207,6 @@ public class EnemyScript : MonoBehaviour
                 _finalPosition = _hit.position;
             }
         }
-        Debug.Log(_finalPosition);
         return _finalPosition;
     }
     public void KnockBack(int knockbackPower)

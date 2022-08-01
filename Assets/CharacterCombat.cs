@@ -38,6 +38,21 @@ public class CharacterCombat : MonoBehaviour
     private Vector2 _initialValueGuideArrow = new Vector2(0,0);
     private float _initialRangeBow = 0;
     [SerializeField] private WeaponSO _swordSO, _bowSO;
+    private float _rayLength;
+    [SerializeField] private bool _arrowBlock = false;
+    private float _savedDistance;
+    [SerializeField] private float _arrowMultiplier;
+
+    #region Animation Strings    
+    private static string
+        _backToMovement = "BackToMove",
+        _swordFirstAnim = "SwordCombo1",
+        _bowDraw = "BowDraw",
+        _bowRecoil = "BowRecoil",
+        _bowMovement = "Bow Movement",
+        _dummyAnim = "Dummy",
+        _isBow = "IsBow";
+    #endregion
     // Start is called before the first frame update
     void Start()
     {
@@ -45,13 +60,13 @@ public class CharacterCombat : MonoBehaviour
         _characterController = GetComponent<CharacterController>();
         if(_currentWeapon._weaponType == WeaponTypes.Sword)
         {
-            _animator.SetBool("IsBow", false);
-            _animator.Play("Dummy");
+            _animator.SetBool(_isBow, false);
+            _animator.Play(_dummyAnim);
         }
         else if(_currentWeapon._weaponType == WeaponTypes.Bow)
         {
-            _animator.SetBool("IsBow", true);
-            _animator.Play("Dummy");
+            _animator.SetBool(_isBow, true);
+            _animator.Play(_dummyAnim);
         }
         if(_initialValueGuideArrow == new Vector2(0,0))
         _initialValueGuideArrow = _arrow.gameObject.GetComponent<RectTransform>().sizeDelta;
@@ -79,18 +94,14 @@ public class CharacterCombat : MonoBehaviour
                     {
                         if (Input.GetMouseButtonDown(0))
                         {
-                            _animator.SetBool("BackToMove", false);
+                            _animator.SetBool(_backToMovement, false);
                             _animationTrigger = true;
                             _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
                             _groundPlane = new Plane(Vector3.up, Vector3.zero);
-                            float _rayLength;
 
                             if (_groundPlane.Raycast(_cameraRay, out _rayLength))
                             {
-                                Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
-                                transform.LookAt(_pointToLook);
-                                Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
-                                _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
+                                LookAtDash();
                             }
                             if (_weaponDashCounter == 3)
                             {
@@ -100,27 +111,22 @@ public class CharacterCombat : MonoBehaviour
                         }
                         else if (!_animationTrigger)
                         {
-                            _animator.SetBool("BackToMove", true);
+                            _animator.SetBool(_backToMovement, true);
                         }
                     }
 
                     if (Input.GetMouseButtonDown(0) && !_isAttacking)
                     {
-                        _animator.Play("GreatSword2");
+                        _animator.Play(_swordFirstAnim);
                         _isAttacking = true;
                         _weaponDashCounter = 0;
 
                         _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
                         _groundPlane = new Plane(Vector3.up, Vector3.zero);
-                        float _rayLength;
 
                         if (_groundPlane.Raycast(_cameraRay, out _rayLength))
                         {
-                            Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
-                            transform.LookAt(_pointToLook);
-                            Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
-                            _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
-                            Debug.Log(_clampedDash);
+                            LookAtDash();
                         }
                     }
 
@@ -148,7 +154,8 @@ public class CharacterCombat : MonoBehaviour
                     }
                     if (Input.GetMouseButtonDown(0))
                     {
-                        _animator.Play("Standing Draw Arrow");
+                        _animator.Play(_bowDraw);
+                        _arrowBlock = false;
                         _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
                         _groundPlane = new Plane(Vector3.up, Vector3.zero);
                         _finishDrawBow = false;
@@ -186,7 +193,6 @@ public class CharacterCombat : MonoBehaviour
                             _arrow.gameObject.SetActive(true);
                             Ray _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
                             Plane _groundPlane = new Plane(Vector3.up, Vector3.zero);
-                            float _rayLength;
 
                             if (_groundPlane.Raycast(_cameraRay, out _rayLength))
                             {
@@ -194,31 +200,60 @@ public class CharacterCombat : MonoBehaviour
                                 transform.LookAt(_pointToLook);
                             }
                             //RangeAttack(_arrow.gameObject, true);
-                            if (_rangeBow < _currentWeapon._bowRange)
+                            RaycastHit hit;
+                            Debug.DrawRay(_middleArrowPos.transform.position, -_middleArrowPos.transform.up * 1000, Color.green);
+                            if (Physics.Raycast(_middleArrowPos.transform.position, -_middleArrowPos.transform.up, out hit, 1000))
                             {
-                                //subject for refactor
-                                _arrow.gameObject.GetComponent<RectTransform>().sizeDelta += new Vector2(1, 0) * Time.deltaTime * _rateOfResize;
-                                _rangeBow += 1f * Time.deltaTime * _rateOfBow;
-                                Debug.Log(_arrow.gameObject.GetComponent<RectTransform>().sizeDelta);
-                                Debug.Log(_rangeBow);
+                                if(hit.distance <= _rangeBow)
+                                {
+                                    _arrowBlock = true;
+                                    _savedDistance = hit.distance;
+                                    //_rangeBow = hit.distance;
+                                }
+                                else
+                                {
+                                    _arrowBlock = false;
+                                    _arrow.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(_rangeBow * _arrowMultiplier, _arrow.gameObject.GetComponent<RectTransform>().sizeDelta.y);
+                                }
+                                Debug.Log(_savedDistance + ":" + hit.distance);
+                                if(_savedDistance != hit.distance)
+                                {
+                                    //_arrowBlock = false;
+                                }
+                                else
+                                {
+                                    Debug.Log("Enter");
+                                    _arrowBlock = true;
+                                    _arrow.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(hit.distance * _arrowMultiplier, _arrow.gameObject.GetComponent<RectTransform>().sizeDelta.y);
+                                }
                             }
-
+                            //else
+                            //{
+                            //    Debug.Log("Inn");
+                            //    _arrowBlock = false;
+                            //}
+                            if (_rangeBow < _currentWeapon._bowRange && !_arrowBlock)
+                            {
+                                Debug.Log("In");
+                                IncreaseRangeAndSprite();
+                            }
                         }
                     }
                     if (Input.GetMouseButtonUp(0))
                     {
                         if(_finishDrawBow)
                         {
-                            _animator.Play("Standing Aim Recoil");
+                            _animator.Play(_bowRecoil);
                             GameObject arrow = Instantiate(_currentWeapon._arrowPrefab, _middleArrowPos.transform.position, transform.rotation);
                             arrow.GetComponent<ArrowScript>().PDistanceToDestroy = _rangeBow;
                         }
                         else
                         {
-                            _animator.Play("Bow Movement");
+                            _animator.Play(_bowMovement);
                         }
                         _arrow.gameObject.SetActive(false);
 
+                        Debug.Log(_arrow.gameObject.GetComponent<RectTransform>().sizeDelta.x / _rangeBow);
 
                         _characterMovement.PIsAimingBow = false;
                     }
@@ -281,7 +316,6 @@ public class CharacterCombat : MonoBehaviour
 
     public void EndDrawBow()
     {
-        Debug.Log("End Draw Bow");
         _finishDrawBow = true;
     }
 
@@ -297,5 +331,20 @@ public class CharacterCombat : MonoBehaviour
             _currentWeapon = _bowSO;
             Start();
         }
+    }
+
+    public void LookAtDash()
+    {
+        Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
+        transform.LookAt(_pointToLook);
+        Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
+        _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
+    }
+
+    public void IncreaseRangeAndSprite()
+    {
+        //subject for refactor
+        _arrow.gameObject.GetComponent<RectTransform>().sizeDelta += new Vector2(1, 0) * Time.deltaTime * _rateOfResize;
+        _rangeBow += 1f * Time.deltaTime * _rateOfBow;
     }
 }
