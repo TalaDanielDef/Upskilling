@@ -7,7 +7,7 @@ public class WaveSpawner : MonoBehaviour
 {
     private static WaveSpawner _instance;
     [SerializeField] private List<WaveInfo> _waveInfo;
-    private GameObject[] _enemies;
+    private List<GameObject> _enemies = new List<GameObject>();
     private float _timer;
     [SerializeField] private int _waveCount = 0;
     [SerializeField] private int _insideWaveCount = 0;
@@ -52,11 +52,9 @@ public class WaveSpawner : MonoBehaviour
         yield return new WaitForSeconds(2f);
         while (_waveCount < _waveInfo.Count)
         {
-            Debug.Log("3321");
             yield return new WaitForSeconds(_waveInfo[_waveCount].PTimerForNextWave);
             StartCoroutine(StartSpawningInsideWave());
             yield return new WaitUntil(() => _spawningInsideWaves == false);
-            Debug.Log("3322");
             _waveCount++;
         }
 
@@ -70,20 +68,22 @@ public class WaveSpawner : MonoBehaviour
             yield return new WaitUntil(() => !HaveEnemies());
             yield return new WaitForSeconds(_waveInfo[_waveCount].PListInsideWave[_insideWaveCount].PTimerForNextInsideWave);
             {
+                if(_enemies.Count != 0)
+                _enemies.Clear();
                 for(int i = 0; i < _waveInfo[_waveCount].PListInsideWave[_insideWaveCount].PEnemySO.Count; i++)
                 {
                     GameObject _enemy = Instantiate(_enemyBasePrefab, this.transform.position, Quaternion.identity);
                     _enemy.GetComponent<EnemyScript>().PEnemySO = _waveInfo[_waveCount].PListInsideWave[_insideWaveCount].PEnemySO[i];
                     _enemy.transform.position = GetRandomPosition();
+                    _enemies.Add(_enemy);
                 }
-
+                CharacterCombat.PInstance.PEnemies = _enemies;
                 SetEnemyCount(_waveInfo[_waveCount].PListInsideWave[_insideWaveCount].PEnemySO.Count);
                 _insideWaveCount++;
             }
         }
         _insideWaveCount = 0;
         yield return new WaitUntil(() => !HaveEnemies());
-        Debug.Log("3322");
         _spawningInsideWaves = false;
     }
 
@@ -178,5 +178,6 @@ public class WaveSpawner : MonoBehaviour
 
     public int PEnemyCount { get { return _enemyCount; } set { _enemyCount = value; } }
     public static WaveSpawner PInstance { get { return _instance; } }
+    public List<GameObject> PEnemies { get { return _enemies; } }
     #endregion
 }

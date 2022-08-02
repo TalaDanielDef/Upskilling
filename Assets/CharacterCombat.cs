@@ -5,29 +5,33 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 public class CharacterCombat : MonoBehaviour
 {
+    private static CharacterCombat _instance;
     [SerializeField] private WeaponTypes _currentWeaponType;
     [SerializeField] private WeaponSO _currentWeapon;
+    [SerializeField] private GameObject _swordWeapon;
+    [SerializeField] private GameObject _bowWeapon;
+    private CharacterMovement _characterMovement;
+    private CharacterController _characterController;
+    [SerializeField] private Animator _animator;
+    [SerializeField] private Camera _mainCamera;
+
+    public enum WeaponTypes { Sword, Bow, FinFunnels }
+
+    #region
     public int _weaponDashCounter = 0;
     private Vector3 _clampedDash;
     public int _currentWeaponDamage = 0;
     public int _currentWeaponKnockback = 0;
     public bool _animationFlag = false;
-    public enum WeaponTypes { Sword, Bow }
-    [SerializeField] private Animator _animator;
-    [SerializeField] private Camera _mainCamera;
     public bool _animationTrigger = false;
     public bool _isAttacking = false;
-    [SerializeField] private GameObject _dashTrailObject;
-    [SerializeField] private float _dashSpeed;
-    [SerializeField] private float _dashTime;
-    private CharacterMovement _characterMovement;
-    private CharacterController _characterController;
+    #endregion
+
+    #region Bow
     [SerializeField] private Image _arrow;
     [SerializeField] private float _rateOfResize;
     [SerializeField] private float _rangeBow;
     [SerializeField] private float _rateOfBow;
-    [SerializeField] private GameObject _swordWeapon;
-    [SerializeField] private GameObject _bowWeapon;
     public bool _finishDrawBow;
     private float _bowRotTimer;
     private bool _bowStartRotTimer = false;
@@ -42,7 +46,24 @@ public class CharacterCombat : MonoBehaviour
     [SerializeField] private bool _arrowBlock = false;
     private float _savedDistance;
     [SerializeField] private float _arrowMultiplier;
+    #endregion
 
+    #region Dash
+    [SerializeField] private GameObject _dashTrailObject;
+    [SerializeField] private float _dashSpeed;
+    [SerializeField] private float _dashTime;
+    #endregion
+
+    #region Fin Funnels
+    private List<GameObject> _enemies = new List<GameObject>();
+    private List<GameObject> _inRangeEnemies = new List<GameObject>();
+    [SerializeField] private GameObject _funnelOutPosition;
+    [SerializeField] private float _funnelDelaySpawn;
+    [SerializeField] private GameObject _funnelInitialPos;
+    [SerializeField] private GameObject _funnelParent;
+    private bool _returnFunnels = false;
+    [SerializeField] private float _funnelTurnSpeed;
+    #endregion
     #region Animation Strings    
     private static string
         _backToMovement = "BackToMove",
@@ -53,7 +74,12 @@ public class CharacterCombat : MonoBehaviour
         _dummyAnim = "Dummy",
         _isBow = "IsBow";
     #endregion
-    // Start is called before the first frame update
+
+    private void Awake()
+    {
+        _instance = this;
+    }
+
     void Start()
     {
         _characterMovement = GetComponent<CharacterMovement>();
@@ -199,7 +225,6 @@ public class CharacterCombat : MonoBehaviour
                                 Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
                                 transform.LookAt(_pointToLook);
                             }
-                            //RangeAttack(_arrow.gameObject, true);
                             RaycastHit hit;
                             Debug.DrawRay(_middleArrowPos.transform.position, -_middleArrowPos.transform.up * 1000, Color.green);
                             if (Physics.Raycast(_middleArrowPos.transform.position, -_middleArrowPos.transform.up, out hit, 1000))
@@ -208,33 +233,21 @@ public class CharacterCombat : MonoBehaviour
                                 {
                                     _arrowBlock = true;
                                     _savedDistance = hit.distance;
-                                    //_rangeBow = hit.distance;
                                 }
                                 else
                                 {
                                     _arrowBlock = false;
                                     _arrow.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(_rangeBow * _arrowMultiplier, _arrow.gameObject.GetComponent<RectTransform>().sizeDelta.y);
                                 }
-                                Debug.Log(_savedDistance + ":" + hit.distance);
-                                if(_savedDistance != hit.distance)
+
+                                if(_savedDistance == hit.distance)
                                 {
-                                    //_arrowBlock = false;
-                                }
-                                else
-                                {
-                                    Debug.Log("Enter");
                                     _arrowBlock = true;
                                     _arrow.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(hit.distance * _arrowMultiplier, _arrow.gameObject.GetComponent<RectTransform>().sizeDelta.y);
                                 }
                             }
-                            //else
-                            //{
-                            //    Debug.Log("Inn");
-                            //    _arrowBlock = false;
-                            //}
                             if (_rangeBow < _currentWeapon._bowRange && !_arrowBlock)
                             {
-                                Debug.Log("In");
                                 IncreaseRangeAndSprite();
                             }
                         }
@@ -259,15 +272,39 @@ public class CharacterCombat : MonoBehaviour
                     }
                     break;
                 }
+            case WeaponTypes.FinFunnels:
+                {
+                    if(_enemies.Count != 0)
+                    {
+                        for (int i = 0; i < _enemies.Count; i++)
+                        {
+                            if(Vector3.Distance(this.transform.position, _enemies[i].transform.position) < _currentWeapon._enemyDetectionRange)
+                            {
+                                if(!_inRangeEnemies.Contains(_enemies[i]))
+                                _inRangeEnemies.Add(_enemies[i]);
+                            }
+                            else
+                            {
+                                _inRangeEnemies.Remove(_enemies[i]);
+                            }
+                        }
+                    }
+
+                    if(_inRangeEnemies.Count != 0 )
+                    {
+                        if (_funnelParent.transform.childCount ==  0)
+                        StartCoroutine(SpawnFunnels());
+                    }
+                    else if(!_returnFunnels && _funnelParent.transform.childCount != 0)
+                    {
+                        StartCoroutine(RecallFunnels());
+                        _returnFunnels = true;
+                    }
+                    break;
+                }
         }
-
-
-
     }
-    //public void RangeAttack(GameObject _toExtend, bool _ifExtend)
-    //{
 
-    //}
     IEnumerator StartDash(Vector3 offsetDirection)
     {
         float _startTime = Time.time;
@@ -295,9 +332,7 @@ public class CharacterCombat : MonoBehaviour
         }
 
         if (_weaponDashCounter < 3)
-        {
             _weaponDashCounter++;
-        }
         else
             _weaponDashCounter = 0;
     }
@@ -312,7 +347,6 @@ public class CharacterCombat : MonoBehaviour
     {
         Gizmos.DrawWireSphere(this.transform.position, _rangeBow);
     }
-
 
     public void EndDrawBow()
     {
@@ -347,4 +381,62 @@ public class CharacterCombat : MonoBehaviour
         _arrow.gameObject.GetComponent<RectTransform>().sizeDelta += new Vector2(1, 0) * Time.deltaTime * _rateOfResize;
         _rangeBow += 1f * Time.deltaTime * _rateOfBow;
     }
+
+    IEnumerator SpawnFunnels()
+    {
+        //for (int i = 0; i < _currentWeapon._funnelCount; i++)
+        //{
+        //    GameObject _funnel = Instantiate(_currentWeapon._funnelPrefab, _funnelOutPosition.transform.position, Quaternion.identity);
+        //    _funnel.GetComponent<FinFunnels>().PEnemies = _inRangeEnemies;
+        //    _funnel.transform.parent = _funnelParent.transform;
+
+        //    while(_funnel.transform.position != _funnelInitialPos.transform.position)
+        //    {
+        //        //_funnel.transform.LookAt(_funnelInitialPos.transform);
+        //        var direction = (_funnelInitialPos.transform.position - transform.position).normalized;
+        //        var rotGoal = Quaternion.LookRotation(direction);
+        //        _funnel.transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, _funnelTurnSpeed);
+        //        _funnel.transform.position = Vector3.MoveTowards(_funnel.transform.position, _funnelInitialPos.transform.position, Time.deltaTime * _funnel.GetComponent<FinFunnels>().PFunnelSpeed);
+        //    }
+
+        //    Debug.Log(_funnel.transform.position + ":" + _funnelInitialPos.transform.position);
+        //    if(_funnel.transform.position == _funnelInitialPos.transform.position)
+        //    {
+        //        _funnel.GetComponent<FinFunnels>().PFunnelStart = true;
+        //    }
+        //    yield return new WaitForSeconds(_funnelDelaySpawn);
+        //}
+    }
+
+    IEnumerator RecallFunnels()
+    {
+        foreach(Transform _child in _funnelParent.transform)
+        {
+            _child.gameObject.GetComponent<FinFunnels>().PFunnelStart = false;
+            while (_child.position != _funnelInitialPos.transform.position)
+            {
+
+                //_child.transform.LookAt(_funnelInitialPos.transform);
+                var direction = (_funnelInitialPos.transform.position - transform.position).normalized;
+                var rotGoal = Quaternion.LookRotation(direction);
+                _child.transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, _funnelTurnSpeed);
+                _child.position = Vector3.MoveTowards(_child.position, _funnelInitialPos.transform.position, Time.deltaTime * _child.GetComponent<FinFunnels>().PFunnelSpeed);
+            }
+            yield return new WaitForSeconds(0.01f);
+            while (_child.position != _funnelOutPosition.transform.position)
+            {
+                //_child.transform.LookAt(_funnelOutPosition.transform);
+                var direction = (_funnelOutPosition.transform.position - transform.position).normalized;
+                var rotGoal = Quaternion.LookRotation(direction);
+                _child.transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, _funnelTurnSpeed);
+                _child.position = Vector3.MoveTowards(_child.position, _funnelOutPosition.transform.position, Time.deltaTime * _child.GetComponent<FinFunnels>().PFunnelSpeed);
+            }
+            yield return new WaitForSeconds(0.25f);
+
+            Destroy(_child.gameObject);
+        }
+        _returnFunnels = false;
+    }
+    public static CharacterCombat PInstance { get { return _instance; } }
+    public List<GameObject> PEnemies { set { _enemies = value; } }
 }
