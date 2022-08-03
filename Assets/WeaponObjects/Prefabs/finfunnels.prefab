@@ -154,7 +154,7 @@ MonoBehaviour:
   _laserDuration: 0.1
   _enemyRadius: 3
   _delayMovement: 0.5
-  _funnelSpeed: 1
+  _funnelSpeed: 15
   _turnSpeed: 5
 --- !u!54 &879565857200446890
 Rigidbody:

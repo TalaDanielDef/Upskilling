@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class SmoothCameraFlow : MonoBehaviour
 {
-    private Vector3 _offset;
     [SerializeField] private Transform _target;
     [SerializeField] private float _smoothTime;
+    private Vector3 _offset;
     private Vector3 _currentVelocity = Vector3.zero;
     private void Awake()
     {

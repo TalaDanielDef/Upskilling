@@ -4,14 +4,15 @@ using UnityEngine;
 
 public class WeaponPodiumScript : MonoBehaviour
 {
-    private bool _isPlayerNear;
     [SerializeField] private GameObject _pressEGameObject;
-    [SerializeField] private GameObject _swordPodium, _bowPodium;
+    [SerializeField] private WeaponSO _weaponToChange;
+    private bool _isPlayerNear;
     private GameObject _player;
+    private CharacterCombat.WeaponTypes _weaponType;
     // Start is called before the first frame update
     void Start()
     {
-        
+        _player = GameObject.FindGameObjectWithTag("Player");
     }
 
     // Update is called once per frame
@@ -19,26 +20,19 @@ public class WeaponPodiumScript : MonoBehaviour
     {
         if(_isPlayerNear)
         {
-            _pressEGameObject.SetActive(true);
+            _weaponType = _player.GetComponent<CharacterCombat>().PCurrentWeaponSO._weaponType;
+            if(_weaponType != _weaponToChange._weaponType)
+                _pressEGameObject.SetActive(true);
+
         }
         else
         {
             _pressEGameObject.SetActive(false);
         }
 
-        if(_isPlayerNear && Input.GetKeyDown(KeyCode.E))
+        if(_isPlayerNear && Input.GetKeyDown(KeyCode.E) && _pressEGameObject.activeSelf)
         {
-            if(_swordPodium.activeSelf)
-            {
-                _swordPodium.SetActive(false);
-                _bowPodium.SetActive(true);
-            }
-            else if(_bowPodium.activeSelf)
-            {
-                _swordPodium.SetActive(true);
-                _bowPodium.SetActive(false);
-            }
-            _player = GameObject.FindGameObjectWithTag("Player");
+            CharacterCombat.PInstance.PCurrentWeaponSO = _weaponToChange;
             _player.GetComponent<CharacterCombat>().SwapWeapon();
         }
     }

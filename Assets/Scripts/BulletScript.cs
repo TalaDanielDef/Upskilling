@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class BulletScript : MonoBehaviour, IPooledObject
 {
-    private GameObject _player;
-    private Rigidbody _rb;
     [SerializeField] private float _bulletSpeed;
     [SerializeField] private int _damageToPlayer;
+    private GameObject _player;
+    private Rigidbody _rb;
     private bool _haveDamaged = false;
 
     private void OnTriggerEnter(Collider other)
@@ -39,8 +39,6 @@ public class BulletScript : MonoBehaviour, IPooledObject
         {
             this.gameObject.SetActive(false);
         }
-
-        //wall SetActiveFalse
     }
 
     public void OnObjectSpawn()

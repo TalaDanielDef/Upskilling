@@ -7,31 +7,32 @@ using System;
 
 public class EnemyScript : MonoBehaviour
 {
-    [SerializeField] private Slider _hpBar;
     [SerializeField] private int _currentHp;
-    private NavMeshAgent _navMeshAgent;
-    [SerializeField] private GameObject _player;
-    [SerializeField] private EnemyState _currentState;
-    //[SerializeField] private EnemyType _enemyType;
-    //[SerializeField] private float _timeBtwnAttacks;
-    [SerializeField] private EnemySO _enemySO;
-    private Rigidbody _rb;
-    private Vector3 _knockbackPos;
-    public enum EnemyState { Roaming, Attack, Idle}
     [SerializeField] private bool _isKnockback;
-    private float _attackTimer;
-    [SerializeField] private GameObject _bulletPlace;
-    private float _multiplier = 1;
-    public float turnSpeed = .01f;
-    Quaternion rotGoal;
-    Vector3 direction;
     [SerializeField] private bool _isShooting = false;
     [SerializeField] private float _timerToShoot;
     [SerializeField] private bool _isDoneShooting = false;
     [SerializeField] private float _roamTimer;
     [SerializeField] private float _roamRadius;
+    [SerializeField] private GameObject _bulletPlace;
+    [SerializeField] private GameObject _player;
+    [SerializeField] private EnemyState _currentState;
+    [SerializeField] private EnemySO _enemySO;
+    [SerializeField] private Slider _hpBar;
+
+    public float turnSpeed = .01f;
+    private NavMeshAgent _navMeshAgent;
+    private Rigidbody _rb;
+    private float _attackTimer;
+    private float _multiplier = 1;
     private float _currentRoamTimer = 0;
     private bool _isHit = false;
+    private Quaternion rotGoal;
+    private Vector3 direction;
+    private Vector3 _knockbackPos;
+
+    public enum EnemyState { Roaming, Attack, Idle}
+
     private void Start()
     {
         _currentHp = _enemySO._maxHP;

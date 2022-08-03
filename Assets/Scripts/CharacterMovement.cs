@@ -6,26 +6,28 @@ using UnityEngine.InputSystem;
 public class CharacterMovement : MonoBehaviour
 {
 
-    [SerializeField] private CharacterController _characterController;
     [SerializeField] private float _characterSpeed;
+    [SerializeField] private int _rotateSpeed;
+    [SerializeField] private float _gravity = -9.81f;
+    [SerializeField] private Vector3 _offsetRotation;
+    [SerializeField] private LayerMask _groundMask;
+    [SerializeField] private CharacterController _characterController;
+    [SerializeField] private Transform _groundCheck;
     [SerializeField] private PlayerInput _playerInput;
     [SerializeField] private InputAction _inputActions;
     [SerializeField] private Animator _animator;
-    [SerializeField] private int _rotateSpeed;
-    [SerializeField] private GameObject _staticRotation;
-    [SerializeField] private Vector3 _offsetRotation;
-    [SerializeField] private float _gravity = -9.81f;
-    [SerializeField] private Transform _groundCheck;
-    private float _groundDistance = 0.4f;
-    [SerializeField] private LayerMask _groundMask;
-    private Vector3 _velocity;
-    private bool _isGrounded;
     [SerializeField] private GameObject _dashTrailObject;
+    [SerializeField] private GameObject _staticRotation;
+
+    private float _groundDistance = 0.4f;
+    private bool _isGrounded;
     private int _rotateSpeedHolder;
+    private bool _isAimingBow;
     private Vector3 _fixedDirection;
     private Vector3 _offsetDirection;
+    private Vector3 _velocity;
     private CharacterCombat _characterCombat;
-    private bool _isAimingBow;
+
     private void Start()
     {
         _rotateSpeedHolder = _rotateSpeed;

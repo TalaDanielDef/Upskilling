@@ -6,14 +6,14 @@ using UnityEngine.AI;
 public class WaveSpawner : MonoBehaviour
 {
     private static WaveSpawner _instance;
-    [SerializeField] private List<WaveInfo> _waveInfo;
-    private List<GameObject> _enemies = new List<GameObject>();
-    private float _timer;
+
     [SerializeField] private int _waveCount = 0;
     [SerializeField] private int _insideWaveCount = 0;
+    [SerializeField] private List<WaveInfo> _waveInfo;
+    [SerializeField] private List<GameObject> _enemies = new List<GameObject>();
     [SerializeField] private GameObject _enemyBasePrefab;
     [SerializeField] private GameObject _stageDimensions;
-    private bool _noEnemies;
+
     private int _enemyCount;
     private bool _spawningInsideWaves = false;
     private void Awake()
@@ -73,9 +73,10 @@ public class WaveSpawner : MonoBehaviour
                 for(int i = 0; i < _waveInfo[_waveCount].PListInsideWave[_insideWaveCount].PEnemySO.Count; i++)
                 {
                     GameObject _enemy = Instantiate(_enemyBasePrefab, this.transform.position, Quaternion.identity);
+                    _enemies.Add(_enemy);
                     _enemy.GetComponent<EnemyScript>().PEnemySO = _waveInfo[_waveCount].PListInsideWave[_insideWaveCount].PEnemySO[i];
                     _enemy.transform.position = GetRandomPosition();
-                    _enemies.Add(_enemy);
+
                 }
                 CharacterCombat.PInstance.PEnemies = _enemies;
                 SetEnemyCount(_waveInfo[_waveCount].PListInsideWave[_insideWaveCount].PEnemySO.Count);

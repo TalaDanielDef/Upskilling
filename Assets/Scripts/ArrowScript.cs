@@ -5,9 +5,10 @@ using UnityEngine;
 public class ArrowScript : MonoBehaviour
 {
     [SerializeField] private int _arrowDamage;
-    private Rigidbody _rb;
     [SerializeField] private float _arrowSpeed;
+
     private float _distanceToDestroy;
+    private Rigidbody _rb;
     private Vector3 _offset;
     private GameObject _player;
     private void Start()

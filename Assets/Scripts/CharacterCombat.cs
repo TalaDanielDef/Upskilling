@@ -6,64 +6,72 @@ using UnityEngine.UI;
 public class CharacterCombat : MonoBehaviour
 {
     private static CharacterCombat _instance;
+
     [SerializeField] private WeaponTypes _currentWeaponType;
     [SerializeField] private WeaponSO _currentWeapon;
     [SerializeField] private GameObject _swordWeapon;
     [SerializeField] private GameObject _bowWeapon;
-    private CharacterMovement _characterMovement;
-    private CharacterController _characterController;
     [SerializeField] private Animator _animator;
     [SerializeField] private Camera _mainCamera;
 
+    private CharacterMovement _characterMovement;
+    private CharacterController _characterController;
+
+
     public enum WeaponTypes { Sword, Bow, FinFunnels }
 
-    #region
+    [Header("Sword")]
+    #region Sword
     public int _weaponDashCounter = 0;
-    private Vector3 _clampedDash;
     public int _currentWeaponDamage = 0;
     public int _currentWeaponKnockback = 0;
     public bool _animationFlag = false;
     public bool _animationTrigger = false;
     public bool _isAttacking = false;
+
+    private Vector3 _clampedDash;
     #endregion
 
+    [Header("Bow")]
     #region Bow
     [SerializeField] private Image _arrow;
     [SerializeField] private float _rateOfResize;
     [SerializeField] private float _rangeBow;
     [SerializeField] private float _rateOfBow;
-    public bool _finishDrawBow;
-    private float _bowRotTimer;
-    private bool _bowStartRotTimer = false;
     [SerializeField] private float _bowTurnSpeed;
+    [SerializeField] private GameObject _middleArrowPos;
+    [SerializeField] private bool _arrowBlock = false;
+    [SerializeField] private float _arrowMultiplier;
+
+    private bool _finishDrawBow;
+    private bool _bowStartRotTimer = false;
     private Ray _cameraRay;
     private Plane _groundPlane;
-    [SerializeField] private GameObject _middleArrowPos;
     private Vector2 _initialValueGuideArrow = new Vector2(0,0);
     private float _initialRangeBow = 0;
-    [SerializeField] private WeaponSO _swordSO, _bowSO;
     private float _rayLength;
-    [SerializeField] private bool _arrowBlock = false;
     private float _savedDistance;
-    [SerializeField] private float _arrowMultiplier;
+    private float _bowRotTimer;
     #endregion
 
+    [Header("Fin Funnels")]
+    #region Fin Funnels
+    private List<GameObject> _enemies = new List<GameObject>();
+    [SerializeField] private List<GameObject> _inRangeEnemies = new List<GameObject>();
+    [SerializeField] private GameObject _funnelOutPosition;
+    [SerializeField] private GameObject _funnelInitialPos;
+    [SerializeField] private GameObject _funnelParent;
+    [SerializeField] private float _funnelDelaySpawn;
+    [SerializeField] private float _funnelTurnSpeed;
+    #endregion
+
+    [Header("Dash")]
     #region Dash
     [SerializeField] private GameObject _dashTrailObject;
     [SerializeField] private float _dashSpeed;
     [SerializeField] private float _dashTime;
     #endregion
 
-    #region Fin Funnels
-    private List<GameObject> _enemies = new List<GameObject>();
-    private List<GameObject> _inRangeEnemies = new List<GameObject>();
-    [SerializeField] private GameObject _funnelOutPosition;
-    [SerializeField] private float _funnelDelaySpawn;
-    [SerializeField] private GameObject _funnelInitialPos;
-    [SerializeField] private GameObject _funnelParent;
-    private bool _returnFunnels = false;
-    [SerializeField] private float _funnelTurnSpeed;
-    #endregion
     #region Animation Strings    
     private static string
         _backToMovement = "BackToMove",
@@ -72,7 +80,9 @@ public class CharacterCombat : MonoBehaviour
         _bowRecoil = "BowRecoil",
         _bowMovement = "Bow Movement",
         _dummyAnim = "Dummy",
-        _isBow = "IsBow";
+        _isBow = "IsBow",
+        _isFunnel = "IsFunnels",
+        _funnelMove = "FunnelMovement";
     #endregion
 
     private void Awake()
@@ -82,8 +92,14 @@ public class CharacterCombat : MonoBehaviour
 
     void Start()
     {
-        _characterMovement = GetComponent<CharacterMovement>();
+        if (_characterMovement == null)
+            _characterMovement = GetComponent<CharacterMovement>();
+
+        if (_characterController == null)
         _characterController = GetComponent<CharacterController>();
+
+        _animator.SetBool(_isBow, false);
+        _animator.SetBool(_isFunnel, false);
         if(_currentWeapon._weaponType == WeaponTypes.Sword)
         {
             _animator.SetBool(_isBow, false);
@@ -94,10 +110,17 @@ public class CharacterCombat : MonoBehaviour
             _animator.SetBool(_isBow, true);
             _animator.Play(_dummyAnim);
         }
+        else if(_currentWeapon._weaponType == WeaponTypes.FinFunnels)
+        {
+            _animator.SetBool(_isFunnel, true);
+            _animator.Play(_funnelMove);
+        }
+
         if(_initialValueGuideArrow == new Vector2(0,0))
-        _initialValueGuideArrow = _arrow.gameObject.GetComponent<RectTransform>().sizeDelta;
+            _initialValueGuideArrow = _arrow.gameObject.GetComponent<RectTransform>().sizeDelta;
+
         if(_initialRangeBow == 0)
-        _initialRangeBow = _rangeBow;
+            _initialRangeBow = _rangeBow;
     }
 
     // Update is called once per frame
@@ -229,22 +252,26 @@ public class CharacterCombat : MonoBehaviour
                             Debug.DrawRay(_middleArrowPos.transform.position, -_middleArrowPos.transform.up * 1000, Color.green);
                             if (Physics.Raycast(_middleArrowPos.transform.position, -_middleArrowPos.transform.up, out hit, 1000))
                             {
-                                if(hit.distance <= _rangeBow)
+                                if(hit.collider.tag.Equals("Wall"))
                                 {
-                                    _arrowBlock = true;
-                                    _savedDistance = hit.distance;
-                                }
-                                else
-                                {
-                                    _arrowBlock = false;
-                                    _arrow.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(_rangeBow * _arrowMultiplier, _arrow.gameObject.GetComponent<RectTransform>().sizeDelta.y);
-                                }
+                                    if(hit.distance <= _rangeBow)
+                                    {
+                                        _arrowBlock = true;
+                                        _savedDistance = hit.distance;
+                                    }
+                                    else
+                                    {
+                                        _arrowBlock = false;
+                                        _arrow.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(_rangeBow * _arrowMultiplier, _arrow.gameObject.GetComponent<RectTransform>().sizeDelta.y);
+                                    }
 
-                                if(_savedDistance == hit.distance)
-                                {
-                                    _arrowBlock = true;
-                                    _arrow.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(hit.distance * _arrowMultiplier, _arrow.gameObject.GetComponent<RectTransform>().sizeDelta.y);
+                                    if(_savedDistance == hit.distance)
+                                    {
+                                        _arrowBlock = true;
+                                        _arrow.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(hit.distance * _arrowMultiplier, _arrow.gameObject.GetComponent<RectTransform>().sizeDelta.y);
+                                    }
                                 }
+                                
                             }
                             if (_rangeBow < _currentWeapon._bowRange && !_arrowBlock)
                             {
@@ -274,41 +301,50 @@ public class CharacterCombat : MonoBehaviour
                 }
             case WeaponTypes.FinFunnels:
                 {
-                    if(_enemies.Count != 0)
+                    if (_swordWeapon.activeSelf)
+                    {
+                        _swordWeapon.SetActive(false);
+                    }
+                    if (_bowWeapon.activeSelf)
+                    {
+                        _bowWeapon.SetActive(false);
+                    }
+                    if (_enemies.Count != 0)
                     {
                         for (int i = 0; i < _enemies.Count; i++)
                         {
-                            if(Vector3.Distance(this.transform.position, _enemies[i].transform.position) < _currentWeapon._enemyDetectionRange)
+                            if(_enemies[i] != null)
                             {
-                                if(!_inRangeEnemies.Contains(_enemies[i]))
-                                _inRangeEnemies.Add(_enemies[i]);
+                                if(Vector3.Distance(this.transform.position, _enemies[i].transform.position) < _currentWeapon._enemyDetectionRange)
+                                {
+                                    if(!_inRangeEnemies.Contains(_enemies[i]))
+                                    _inRangeEnemies.Add(_enemies[i]);
+                                }
+                                else
+                                {
+                                    _inRangeEnemies.Remove(_enemies[i]);
+                                }
                             }
-                            else
-                            {
-                                _inRangeEnemies.Remove(_enemies[i]);
-                            }
+
                         }
                     }
 
                     if(_inRangeEnemies.Count != 0 )
                     {
-                        if (_funnelParent.transform.childCount ==  0)
-                        StartCoroutine(SpawnFunnels());
-                    }
-                    else if(!_returnFunnels && _funnelParent.transform.childCount != 0)
-                    {
-                        StartCoroutine(RecallFunnels());
-                        _returnFunnels = true;
+                        if (_funnelParent.transform.childCount !=  _currentWeapon._funnelCount)
+                        {
+                            StartCoroutine(SpawnFunnels());
+                        }
                     }
                     break;
                 }
         }
     }
 
+    #region Coroutines
     IEnumerator StartDash(Vector3 offsetDirection)
     {
         float _startTime = Time.time;
-        //_dashTrailObject.SetActive(true);
         _dashTrailObject.GetComponent<TrailRenderer>().emitting = true;
         while (Time.time < _startTime + _dashTime)
         {
@@ -316,11 +352,6 @@ public class CharacterCombat : MonoBehaviour
             yield return null;
         }
         _dashTrailObject.GetComponent<TrailRenderer>().emitting = false;
-    }
-
-    public void StartDashFromWeapon()
-    {
-        StartCoroutine(DashFromWeapon());
     }
     IEnumerator DashFromWeapon()
     {
@@ -336,6 +367,28 @@ public class CharacterCombat : MonoBehaviour
         else
             _weaponDashCounter = 0;
     }
+
+    IEnumerator SpawnFunnels()
+    {
+
+        GameObject _funnel = Instantiate(_currentWeapon._funnelPrefab, _funnelOutPosition.transform.position, Quaternion.identity);
+        _funnel.GetComponent<FinFunnels>().PEnemies = _inRangeEnemies;
+        _funnel.GetComponent<FinFunnels>().PInitialPos = _funnelInitialPos;
+        _funnel.GetComponent<FinFunnels>().PDamageToEnemy = _currentWeapon._damagePerHitFunnel;
+        _funnel.transform.parent = _funnelParent.transform;
+
+        yield return new WaitForSeconds(_funnelDelaySpawn);
+        
+    }
+
+    #endregion
+
+    #region Functions
+    public void StartDashFromWeapon()
+    {
+        StartCoroutine(DashFromWeapon());
+    }
+
 
     public void RegisterWeaponDamage()
     {
@@ -355,16 +408,7 @@ public class CharacterCombat : MonoBehaviour
 
     public void SwapWeapon()
     {
-        if (_currentWeapon._weaponType == WeaponTypes.Bow)
-        {
-            _currentWeapon = _swordSO;
-            Start();
-        }
-        else if (_currentWeapon._weaponType == WeaponTypes.Sword)
-        {
-            _currentWeapon = _bowSO;
-            Start();
-        }
+        Start();
     }
 
     public void LookAtDash()
@@ -382,61 +426,11 @@ public class CharacterCombat : MonoBehaviour
         _rangeBow += 1f * Time.deltaTime * _rateOfBow;
     }
 
-    IEnumerator SpawnFunnels()
-    {
-        //for (int i = 0; i < _currentWeapon._funnelCount; i++)
-        //{
-        //    GameObject _funnel = Instantiate(_currentWeapon._funnelPrefab, _funnelOutPosition.transform.position, Quaternion.identity);
-        //    _funnel.GetComponent<FinFunnels>().PEnemies = _inRangeEnemies;
-        //    _funnel.transform.parent = _funnelParent.transform;
+    #endregion
 
-        //    while(_funnel.transform.position != _funnelInitialPos.transform.position)
-        //    {
-        //        //_funnel.transform.LookAt(_funnelInitialPos.transform);
-        //        var direction = (_funnelInitialPos.transform.position - transform.position).normalized;
-        //        var rotGoal = Quaternion.LookRotation(direction);
-        //        _funnel.transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, _funnelTurnSpeed);
-        //        _funnel.transform.position = Vector3.MoveTowards(_funnel.transform.position, _funnelInitialPos.transform.position, Time.deltaTime * _funnel.GetComponent<FinFunnels>().PFunnelSpeed);
-        //    }
-
-        //    Debug.Log(_funnel.transform.position + ":" + _funnelInitialPos.transform.position);
-        //    if(_funnel.transform.position == _funnelInitialPos.transform.position)
-        //    {
-        //        _funnel.GetComponent<FinFunnels>().PFunnelStart = true;
-        //    }
-        //    yield return new WaitForSeconds(_funnelDelaySpawn);
-        //}
-    }
-
-    IEnumerator RecallFunnels()
-    {
-        foreach(Transform _child in _funnelParent.transform)
-        {
-            _child.gameObject.GetComponent<FinFunnels>().PFunnelStart = false;
-            while (_child.position != _funnelInitialPos.transform.position)
-            {
-
-                //_child.transform.LookAt(_funnelInitialPos.transform);
-                var direction = (_funnelInitialPos.transform.position - transform.position).normalized;
-                var rotGoal = Quaternion.LookRotation(direction);
-                _child.transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, _funnelTurnSpeed);
-                _child.position = Vector3.MoveTowards(_child.position, _funnelInitialPos.transform.position, Time.deltaTime * _child.GetComponent<FinFunnels>().PFunnelSpeed);
-            }
-            yield return new WaitForSeconds(0.01f);
-            while (_child.position != _funnelOutPosition.transform.position)
-            {
-                //_child.transform.LookAt(_funnelOutPosition.transform);
-                var direction = (_funnelOutPosition.transform.position - transform.position).normalized;
-                var rotGoal = Quaternion.LookRotation(direction);
-                _child.transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, _funnelTurnSpeed);
-                _child.position = Vector3.MoveTowards(_child.position, _funnelOutPosition.transform.position, Time.deltaTime * _child.GetComponent<FinFunnels>().PFunnelSpeed);
-            }
-            yield return new WaitForSeconds(0.25f);
-
-            Destroy(_child.gameObject);
-        }
-        _returnFunnels = false;
-    }
     public static CharacterCombat PInstance { get { return _instance; } }
     public List<GameObject> PEnemies { set { _enemies = value; } }
+    public GameObject POutPos { get { return _funnelOutPosition; } }
+    public GameObject PInitialPos { get { return _funnelInitialPos; } }
+    public WeaponSO PCurrentWeaponSO { set { _currentWeapon = value; } get { return _currentWeapon; } }
 }
