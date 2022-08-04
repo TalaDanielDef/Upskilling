@@ -28,6 +28,7 @@ public class FinFunnels : MonoBehaviour
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
+        Debug.Log("Start");
     }
 
     void Update()
@@ -42,7 +43,7 @@ public class FinFunnels : MonoBehaviour
                 _firstSpawn = false;
             }
         }
-        else if(_enemies.Count != 0)
+        else if(_enemies.Count != 0 && (CheckEnemyNull() == false))
         {
             if (_startFindingEnemies)
             {
@@ -55,6 +56,7 @@ public class FinFunnels : MonoBehaviour
                         _generateRandom = true;
                         _randomPosition = Vector3.zero;
                     }
+
                     if (_generateRandom)
                     {
                         _randomEnemy = (int)Random.Range(0, _enemies.Count);
@@ -116,7 +118,7 @@ public class FinFunnels : MonoBehaviour
             }
         }
         //interna 
-        else
+        else if(CheckEnemyNull())
         {
             _outPosition = CharacterCombat.PInstance.POutPos;
             _initialPosition = CharacterCombat.PInstance.PInitialPos;
@@ -160,6 +162,18 @@ public class FinFunnels : MonoBehaviour
             transform.position = _randomPosition;
             _randomPosition = Vector3.zero;
         }
+    }
+
+    public bool CheckEnemyNull()
+    {
+        bool _listNull = true;
+        for(int i = 0; i < _enemies.Count; i++)
+        {
+            if (_enemies[i] != null)
+                _listNull = false;
+        }
+
+        return _listNull;
     }
 
     public List<GameObject> PEnemies { set { _enemies = value; } }

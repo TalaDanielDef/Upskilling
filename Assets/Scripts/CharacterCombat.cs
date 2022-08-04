@@ -325,11 +325,10 @@ public class CharacterCombat : MonoBehaviour
                                     _inRangeEnemies.Remove(_enemies[i]);
                                 }
                             }
-
                         }
                     }
 
-                    if(_inRangeEnemies.Count != 0 )
+                    if(_inRangeEnemies.Count != 0 && !CheckEnemyNull())
                     {
                         if (_funnelParent.transform.childCount !=  _currentWeapon._funnelCount)
                         {
@@ -370,7 +369,7 @@ public class CharacterCombat : MonoBehaviour
 
     IEnumerator SpawnFunnels()
     {
-
+        Debug.Log("Spawn");
         GameObject _funnel = Instantiate(_currentWeapon._funnelPrefab, _funnelOutPosition.transform.position, Quaternion.identity);
         _funnel.GetComponent<FinFunnels>().PEnemies = _inRangeEnemies;
         _funnel.GetComponent<FinFunnels>().PInitialPos = _funnelInitialPos;
@@ -426,6 +425,23 @@ public class CharacterCombat : MonoBehaviour
         _rangeBow += 1f * Time.deltaTime * _rateOfBow;
     }
 
+    public bool CheckEnemyNull()
+    {
+        bool _listNull = true;
+        for (int i = 0; i < _inRangeEnemies.Count; i++)
+        {
+            if (_inRangeEnemies[i] != null)
+                _listNull = false;
+        }
+
+        return _listNull;
+    }
+
+    public void ClearInRangeEnemies()
+    {
+        _inRangeEnemies.Clear();
+    }
+
     #endregion
 
     public static CharacterCombat PInstance { get { return _instance; } }
@@ -433,4 +449,5 @@ public class CharacterCombat : MonoBehaviour
     public GameObject POutPos { get { return _funnelOutPosition; } }
     public GameObject PInitialPos { get { return _funnelInitialPos; } }
     public WeaponSO PCurrentWeaponSO { set { _currentWeapon = value; } get { return _currentWeapon; } }
+    public List<GameObject> PEnemiesInRange { get { return _inRangeEnemies; } set { _inRangeEnemies = value; } }
 }

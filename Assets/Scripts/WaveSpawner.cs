@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using TMPro;
+using UnityEngine.UI;
 
 public class WaveSpawner : MonoBehaviour
 {
@@ -13,7 +15,8 @@ public class WaveSpawner : MonoBehaviour
     [SerializeField] private List<GameObject> _enemies = new List<GameObject>();
     [SerializeField] private GameObject _enemyBasePrefab;
     [SerializeField] private GameObject _stageDimensions;
-
+    [SerializeField] private Button _waveResetButton;
+    [SerializeField] private TextMeshProUGUI _waveCountText;
     private int _enemyCount;
     private bool _spawningInsideWaves = false;
     private void Awake()
@@ -23,11 +26,18 @@ public class WaveSpawner : MonoBehaviour
     private void Start()
     {
         StartWaves();
+        _waveResetButton.interactable = false;
+        _waveCountText.text = "1";
     }
 
     public void StartWaves()
     {
         StartCoroutine(StartSpawningWave());
+    }
+
+    public void UpdateText()
+    {
+        _waveCountText.text = (_waveCount + 1).ToString();
     }
 
     public bool HaveEnemies()
@@ -52,10 +62,17 @@ public class WaveSpawner : MonoBehaviour
         yield return new WaitForSeconds(2f);
         while (_waveCount < _waveInfo.Count)
         {
+            UpdateText();
             yield return new WaitForSeconds(_waveInfo[_waveCount].PTimerForNextWave);
             StartCoroutine(StartSpawningInsideWave());
             yield return new WaitUntil(() => _spawningInsideWaves == false);
             _waveCount++;
+            Debug.Log("Testt" + _waveCount + ":" + _waveInfo.Count);
+            if (_waveCount + 1 > _waveInfo.Count)
+            {
+                _waveResetButton.interactable = true;
+                //ResetWave();
+            }
         }
 
     }
@@ -69,7 +86,11 @@ public class WaveSpawner : MonoBehaviour
             yield return new WaitForSeconds(_waveInfo[_waveCount].PListInsideWave[_insideWaveCount].PTimerForNextInsideWave);
             {
                 if(_enemies.Count != 0)
-                _enemies.Clear();
+                {
+                    _enemies.Clear();
+                    CharacterCombat.PInstance.PEnemiesInRange.Clear();
+                }
+
                 for(int i = 0; i < _waveInfo[_waveCount].PListInsideWave[_insideWaveCount].PEnemySO.Count; i++)
                 {
                     GameObject _enemy = Instantiate(_enemyBasePrefab, this.transform.position, Quaternion.identity);
@@ -155,6 +176,12 @@ public class WaveSpawner : MonoBehaviour
         return _minMaxOfZ;
     }
 
+    public void ResetWave()
+    {
+        _waveCount = 0;
+        Start();
+    }
+
 
     #region Classes
     [System.Serializable]
@@ -176,9 +203,10 @@ public class WaveSpawner : MonoBehaviour
         public float PTimerForNextInsideWave { get { return _timerForNextInsideWave; } }
         public List<EnemySO> PEnemySO { get { return _enemySO; } }
     }
+    #endregion
 
     public int PEnemyCount { get { return _enemyCount; } set { _enemyCount = value; } }
     public static WaveSpawner PInstance { get { return _instance; } }
     public List<GameObject> PEnemies { get { return _enemies; } }
-    #endregion
+
 }

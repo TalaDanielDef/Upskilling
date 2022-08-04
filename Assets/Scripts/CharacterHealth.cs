@@ -10,9 +10,11 @@ public class CharacterHealth : MonoBehaviour
     [SerializeField] private int _currentHp;
     [SerializeField] private Slider _hpSlider;
     [SerializeField] private TextMeshProUGUI _hpText;
+    [SerializeField] private GameObject _gameOverScreen;
     // Start is called before the first frame update
     void Start()
     {
+        Time.timeScale = 1;
         _currentHp = _maxHp;
         UpdateHP();
     }
@@ -27,5 +29,10 @@ public class CharacterHealth : MonoBehaviour
     {
         _currentHp -= reduceHP;
         UpdateHP();
+        if(_currentHp <= 0)
+        {
+            Time.timeScale = 0;
+            _gameOverScreen.SetActive(true);
+        }
     }
 }

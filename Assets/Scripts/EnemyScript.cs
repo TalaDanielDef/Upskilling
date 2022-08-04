@@ -27,10 +27,10 @@ public class EnemyScript : MonoBehaviour
     private float _multiplier = 1;
     private float _currentRoamTimer = 0;
     private bool _isHit = false;
+    private bool _isDestroy = false;
     private Quaternion rotGoal;
     private Vector3 direction;
     private Vector3 _knockbackPos;
-
     public enum EnemyState { Roaming, Attack, Idle}
 
     private void Start()
@@ -50,8 +50,13 @@ public class EnemyScript : MonoBehaviour
 
         if(_currentHp <= 0)
         {
-            WaveSpawner.PInstance.PEnemyCount--;
-            WaveSpawner.PInstance.HaveEnemies();
+            if(!_isDestroy)
+            {
+                WaveSpawner.PInstance.PEnemyCount--;
+                WaveSpawner.PInstance.HaveEnemies();
+                _isDestroy = true;
+            }
+
             Destroy(this.gameObject);
         }
     }
