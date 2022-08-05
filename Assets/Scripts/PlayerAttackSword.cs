@@ -13,6 +13,7 @@ public class PlayerAttackSword : CharacterStateBase
         GetCharacterCombat(animator)._animationTrigger = false;
         GetCharacterCombat(animator).RegisterWeaponDamage();
         GetCharacterCombat(animator).StartDashFromWeapon();
+        GetCharacterCombat(animator)._allowRotate = true;
     }
 
     //OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
@@ -27,6 +28,7 @@ public class PlayerAttackSword : CharacterStateBase
     {
 
         GetCharacterCombat(animator)._isAttacking = false;
+        //GetCharacterCombat(animator)._allowRotate = true;
         //GetCharacterMovement(animator)._animationFlag = false;
     }
 

@@ -28,11 +28,12 @@ public class FinFunnels : MonoBehaviour
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
-        Debug.Log("Start");
     }
 
     void Update()
     {
+        if (_initialPosition == null)
+            return;
         if (_firstSpawn)
         {
             transform.position = Vector3.MoveTowards(transform.position, _initialPosition.transform.position, Time.deltaTime * _funnelSpeed);
@@ -87,8 +88,6 @@ public class FinFunnels : MonoBehaviour
                     {
                         return;
                     }
-
-                    //transform.LookAt(_enemies[_randomEnemy].transform.GetChild(5).gameObject.transform.position);
                     if (_timeBtwnShots <= _timer)
                     {
                         if(_enemies[_randomEnemy] == null)
@@ -135,6 +134,7 @@ public class FinFunnels : MonoBehaviour
                 transform.LookAt(_outPosition.transform);
                 if(transform.position == _outPosition.transform.position)
                 {
+                    CharacterCombat.PInstance.PSpawnedFunnel--;
                     Destroy(this.gameObject);
                 }
             }

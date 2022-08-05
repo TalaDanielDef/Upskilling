@@ -1460,10 +1460,12 @@ MonoBehaviour:
       _enemySO:
       - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
       - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
     - _timerForNextInsideWave: 1
       _enemySO:
       - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
       - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
   - _timerForNextWave: 1
     _insideWaveInfos:
     - _timerForNextInsideWave: 0
@@ -1471,10 +1473,41 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
       - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
       - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
     - _timerForNextInsideWave: 3
       _enemySO:
       - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
       - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+    - _timerForNextInsideWave: 3
+      _enemySO:
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+  - _timerForNextWave: 1
+    _insideWaveInfos:
+    - _timerForNextInsideWave: 0
+      _enemySO:
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+    - _timerForNextInsideWave: 3
+      _enemySO:
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+    - _timerForNextInsideWave: 3
+      _enemySO:
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
       - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
   - _timerForNextWave: 1
     _insideWaveInfos:
@@ -1484,10 +1517,19 @@ MonoBehaviour:
       - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
       - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
       - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
     - _timerForNextInsideWave: 3
       _enemySO:
       - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
       - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+    - _timerForNextInsideWave: 3
+      _enemySO:
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
+      - {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+      - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
       - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
       - {fileID: 11400000, guid: 2201b6813f3ab4c498a27abdb2ba7982, type: 2}
   _enemies: []
@@ -9441,6 +9483,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 87247872013694825, guid: 09aade0ecefd01e4b8f7661acf64f5c2, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 019ef2b755c47f843801b2c91c40420f, type: 2}
     - target: {fileID: 621238768689703075, guid: 09aade0ecefd01e4b8f7661acf64f5c2, type: 3}
       propertyPath: m_IsActive
       value: 0

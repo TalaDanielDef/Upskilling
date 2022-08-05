@@ -19,7 +19,11 @@ MonoBehaviour:
   _weaponKnockbackPerAttack: 
   _bowRange: 0
   _arrowPrefab: {fileID: 0}
-  _enemyDetectionRange: 10000
-  _damagePerHitFunnel: 0
-  _funnelCount: 1
-  _funnelPrefab: {fileID: 879565857200446871, guid: 3a65c43123ef93249a7f57e13939e72c, type: 3}
+  _enemyDetectionRange: 10
+  _damagePerHitFunnel: 5
+  _funnelCount: 7
+  _funnelPrefab:
+    m_AssetGUID: 3a65c43123ef93249a7f57e13939e72c
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0

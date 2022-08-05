@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.AddressableAssets;
 public class CharacterCombat : MonoBehaviour
 {
     private static CharacterCombat _instance;
@@ -28,7 +29,7 @@ public class CharacterCombat : MonoBehaviour
     public bool _animationFlag = false;
     public bool _animationTrigger = false;
     public bool _isAttacking = false;
-
+    public bool _allowRotate = true;
     private Vector3 _clampedDash;
     #endregion
 
@@ -63,6 +64,7 @@ public class CharacterCombat : MonoBehaviour
     [SerializeField] private GameObject _funnelParent;
     [SerializeField] private float _funnelDelaySpawn;
     [SerializeField] private float _funnelTurnSpeed;
+    private int _spawnedFunnel = 0;
     #endregion
 
     [Header("Dash")]
@@ -92,6 +94,7 @@ public class CharacterCombat : MonoBehaviour
 
     void Start()
     {
+        Addressables.InitializeAsync();
         if (_characterMovement == null)
             _characterMovement = GetComponent<CharacterMovement>();
 
@@ -150,13 +153,14 @@ public class CharacterCombat : MonoBehaviour
 
                             if (_groundPlane.Raycast(_cameraRay, out _rayLength))
                             {
-                                LookAtDash();
+                                if(_allowRotate)
+                                    LookAtDash();
                             }
                             if (_weaponDashCounter == 3)
                             {
                                 _weaponDashCounter = 0;
                             }
-
+                            _allowRotate = false;
                         }
                         else if (!_animationTrigger)
                         {
@@ -166,18 +170,20 @@ public class CharacterCombat : MonoBehaviour
 
                     if (Input.GetMouseButtonDown(0) && !_isAttacking)
                     {
-                        _animator.Play(_swordFirstAnim);
-                        _isAttacking = true;
-                        _weaponDashCounter = 0;
-
                         _cameraRay = _mainCamera.ScreenPointToRay(Input.mousePosition);
                         _groundPlane = new Plane(Vector3.up, Vector3.zero);
 
                         if (_groundPlane.Raycast(_cameraRay, out _rayLength))
                         {
-                            LookAtDash();
+                            if(_allowRotate)
+                                LookAtDash();
                         }
+                        _animator.Play(_swordFirstAnim);
+                        _isAttacking = true;
+                        _weaponDashCounter = 0;
+                        _allowRotate = false;
                     }
+
 
                     if (Input.GetKeyDown(KeyCode.LeftShift))
                     {
@@ -330,7 +336,7 @@ public class CharacterCombat : MonoBehaviour
 
                     if(_inRangeEnemies.Count != 0 && !CheckEnemyNull())
                     {
-                        if (_funnelParent.transform.childCount !=  _currentWeapon._funnelCount)
+                        if (_spawnedFunnel != _currentWeapon._funnelCount)
                         {
                             StartCoroutine(SpawnFunnels());
                         }
@@ -370,19 +376,21 @@ public class CharacterCombat : MonoBehaviour
     IEnumerator SpawnFunnels()
     {
         Debug.Log("Spawn");
-        GameObject _funnel = Instantiate(_currentWeapon._funnelPrefab, _funnelOutPosition.transform.position, Quaternion.identity);
-        _funnel.GetComponent<FinFunnels>().PEnemies = _inRangeEnemies;
-        _funnel.GetComponent<FinFunnels>().PInitialPos = _funnelInitialPos;
-        _funnel.GetComponent<FinFunnels>().PDamageToEnemy = _currentWeapon._damagePerHitFunnel;
-        _funnel.transform.parent = _funnelParent.transform;
-
+        var _funnel = Addressables.InstantiateAsync(_currentWeapon._funnelPrefab, _funnelOutPosition.transform.position, Quaternion.identity);
+        Debug.Log(_funnel.IsDone);
+        _spawnedFunnel++;
+        yield return new WaitUntil(() => _funnel.IsDone);
+            GameObject _funnelObj = _funnel.Result as GameObject;
+            _funnelObj.GetComponent<FinFunnels>().PEnemies = _inRangeEnemies;
+            _funnelObj.GetComponent<FinFunnels>().PInitialPos = _funnelInitialPos;
+            _funnelObj.GetComponent<FinFunnels>().PDamageToEnemy = _currentWeapon._damagePerHitFunnel;
+            _funnelObj.transform.parent = _funnelParent.transform;
         yield return new WaitForSeconds(_funnelDelaySpawn);
-        
     }
-
     #endregion
 
     #region Functions
+
     public void StartDashFromWeapon()
     {
         StartCoroutine(DashFromWeapon());
@@ -414,8 +422,11 @@ public class CharacterCombat : MonoBehaviour
     {
         Vector3 _pointToLook = _cameraRay.GetPoint(_rayLength);
         transform.LookAt(_pointToLook);
-        Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize
-        _clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
+        Vector3 _pointToDash = _pointToLook - this.transform.transform.position;        //To Optimize further
+        float _distance = Vector3.Distance(_pointToDash, Vector3.zero);
+        float _slope = 1 / _distance;
+        _clampedDash = _pointToDash * _slope;
+        //_clampedDash = new Vector3(Mathf.Clamp(_pointToDash.x, -1, 1), Mathf.Clamp(_pointToDash.y, -1, 1), Mathf.Clamp(_pointToDash.z, -1, 1));
     }
 
     public void IncreaseRangeAndSprite()
@@ -450,4 +461,5 @@ public class CharacterCombat : MonoBehaviour
     public GameObject PInitialPos { get { return _funnelInitialPos; } }
     public WeaponSO PCurrentWeaponSO { set { _currentWeapon = value; } get { return _currentWeapon; } }
     public List<GameObject> PEnemiesInRange { get { return _inRangeEnemies; } set { _inRangeEnemies = value; } }
+    public int PSpawnedFunnel { get { return _spawnedFunnel; } set { _spawnedFunnel = value; } }
 }

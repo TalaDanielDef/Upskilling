@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 [CreateAssetMenu(fileName = "New Weapon", menuName = "Weapon")]
 public class WeaponSO : ScriptableObject
@@ -22,7 +23,8 @@ public class WeaponSO : ScriptableObject
     public float _enemyDetectionRange;
     public int _damagePerHitFunnel;
     public int _funnelCount;
-    public GameObject _funnelPrefab;
+    public AssetReference _funnelPrefab;
+    //public GameObject _funnelPrefab;
 
 
 }
