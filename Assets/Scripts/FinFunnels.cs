@@ -52,11 +52,15 @@ public class FinFunnels : MonoBehaviour
                 {
                     _timer += Time.deltaTime;
 
-                    if(_enemies[_previousTarget] == null)
+                    if (_previousTarget < _enemies.Count)
                     {
-                        _generateRandom = true;
-                        _randomPosition = Vector3.zero;
+                        if(_enemies[_previousTarget] == null)
+                        {
+                            _generateRandom = true;
+                            _randomPosition = Vector3.zero;
+                        }
                     }
+
 
                     if (_generateRandom)
                     {
@@ -66,10 +70,14 @@ public class FinFunnels : MonoBehaviour
                             //_enemies.RemoveAt(_randomEnemy);
                             return;
                         }
-                        Debug.Log(_enemies.Count);
-                        Debug.Log(_randomEnemy);
-                        _previousTarget = _randomEnemy;
 
+                        if (_randomEnemy >= _enemies.Count)
+                        {
+                            _randomPosition = Vector3.zero;
+                            _generateRandom = true;
+                            return;
+                        }
+                        _previousTarget = _randomEnemy;
                         while (_randomPosition.y < 1.4f)
                             _randomPosition = (Random.onUnitSphere * _enemyRadius) + _enemies[_randomEnemy].transform.position;
 
@@ -77,9 +85,15 @@ public class FinFunnels : MonoBehaviour
                     }
 
 
+                    if (_randomEnemy >= _enemies.Count)
+                    {
+                        _randomPosition = Vector3.zero;
+                        _generateRandom = true;
+                        return;
+                    }
                     transform.position = Vector3.MoveTowards(transform.position, _randomPosition, Time.deltaTime * _funnelSpeed);
                     if(_enemies[_randomEnemy] != null)
-                    {
+                    { 
                         var direction = (_enemies[_randomEnemy].transform.position - transform.position).normalized;
                         var rotGoal = Quaternion.LookRotation(direction);
                         transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, _turnSpeed);
@@ -88,16 +102,16 @@ public class FinFunnels : MonoBehaviour
                     {
                         return;
                     }
+
                     if (_timeBtwnShots <= _timer)
                     {
-                        if(_enemies[_randomEnemy] == null)
+                        if (_randomEnemy >= _enemies.Count)
                         {
                             _randomPosition = Vector3.zero;
                             _generateRandom = true;
                             return;
                         }
-
-                        if(_randomEnemy > _enemies.Count - 1)
+                        if (_enemies[_randomEnemy] == null)
                         {
                             _randomPosition = Vector3.zero;
                             _generateRandom = true;
@@ -106,7 +120,7 @@ public class FinFunnels : MonoBehaviour
                         if (transform.position == _randomPosition)
                         {
                             _lineRend.SetPosition(0, _laserPosition.transform.position);
-                            _lineRend.SetPosition(1, _enemies[_randomEnemy].transform.GetChild(5).gameObject.transform.position);
+                            _lineRend.SetPosition(1, _enemies[_randomEnemy].transform.GetChild(3).gameObject.transform.position);
                             StartCoroutine(ShootLaser());
                             _enemies[_randomEnemy].GetComponent<EnemyScript>().ReduceHP(_damageToEnemy);
                             _timer = 0;
@@ -143,7 +157,7 @@ public class FinFunnels : MonoBehaviour
                 _goingBack = true;
             }
         }
-    }
+    }   
 
     IEnumerator ShootLaser()
     {
@@ -172,7 +186,6 @@ public class FinFunnels : MonoBehaviour
             if (_enemies[i] != null)
                 _listNull = false;
         }
-
         return _listNull;
     }
 

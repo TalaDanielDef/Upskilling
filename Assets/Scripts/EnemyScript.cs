@@ -16,10 +16,12 @@ public class EnemyScript : MonoBehaviour
     [SerializeField] private float _roamRadius;
     [SerializeField] private GameObject _bulletPlace;
     [SerializeField] private GameObject _player;
+    [SerializeField] private GameObject[] _bodyTypes;
     [SerializeField] private EnemyState _currentState;
     [SerializeField] private EnemySO _enemySO;
     [SerializeField] private Slider _hpBar;
-
+    [SerializeField] private EnemyBodyType _currentEnemyBodyType;
+    [SerializeField] private BoxCollider _collider;
     public float turnSpeed = .01f;
     private NavMeshAgent _navMeshAgent;
     private Rigidbody _rb;
@@ -28,10 +30,14 @@ public class EnemyScript : MonoBehaviour
     private float _currentRoamTimer = 0;
     private bool _isHit = false;
     private bool _isDestroy = false;
+    private bool _isSlam = false;
+    private bool _isDoneSlam = false;
+    private bool _isDashing = false;
     private Quaternion rotGoal;
     private Vector3 direction;
     private Vector3 _knockbackPos;
     public enum EnemyState { Roaming, Attack, Idle}
+    public enum EnemyBodyType { Humanoid, Ball}
 
     private void Start()
     {
@@ -40,6 +46,19 @@ public class EnemyScript : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _navMeshAgent.stoppingDistance = _enemySO._stoppingRange;
         _player = GameObject.FindGameObjectWithTag("Player");
+        _currentEnemyBodyType = _enemySO._enemyBodyType;
+        switch (_currentEnemyBodyType)
+        {
+            case EnemyBodyType.Humanoid:
+                _bodyTypes[0].SetActive(true);
+                break;
+            case EnemyBodyType.Ball:
+                _bodyTypes[1].SetActive(true);
+                break;
+
+            default:
+                break;
+        }
     }
 
     public void ReduceHP(int hpReduce)
@@ -90,8 +109,14 @@ public class EnemyScript : MonoBehaviour
                         {
                             if (_attackTimer >= _enemySO._timeBtwnAttacks && !_isKnockback)
                             {
-                                Instantiate(_enemySO._attackPrefab, this.transform, false);
-                                _attackTimer = 0;
+                                direction = (_player.transform.position - transform.position).normalized;
+                                rotGoal = Quaternion.LookRotation(direction);
+                                transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, turnSpeed);
+                                _isSlam = true;
+                                if (!_isDoneSlam)
+                                {
+                                    StartCoroutine(Slam());
+                                }
                             }
                         }
                         break;
@@ -109,6 +134,24 @@ public class EnemyScript : MonoBehaviour
                                 {
                                     StartCoroutine(Shoot());
                                 }
+                            }
+                        }
+                        break;
+                    case EnemySO.EnemyType.Charging:
+                        _attackTimer += Time.deltaTime;
+                        if (_enemySO._attackRange > _distanceToPlayer)
+                        {
+                            if (_attackTimer >= _enemySO._timeBtwnAttacks)
+                            {
+                                _collider.enabled = false;
+                                _isDashing = true;
+                                this.transform.LookAt(_player.transform);
+                                if(_isDashing)
+                                {
+                                    StartCoroutine(Dash());
+                                    _isDashing = false;
+                                }
+                                _attackTimer = 0;
                             }
                         }
                         break;
@@ -131,39 +174,7 @@ public class EnemyScript : MonoBehaviour
             _navMeshAgent.angularSpeed = 200;
         }
 
-        //switch (_enemySO._enemyType)
-        //{
-        //    case EnemySO.EnemyType.Melee:
-        //        _attackTimer += Time.deltaTime;
-        //        if (_enemySO._attackRange > _distanceToPlayer)
-        //        {
-        //            if (_attackTimer >= _enemySO._timeBtwnAttacks && !_isKnockback)
-        //            {
-        //                Instantiate(_enemySO._attackPrefab, this.transform, false);
-        //                _attackTimer = 0;
-        //            }
-        //        }
-        //        break;
-        //    case EnemySO.EnemyType.Range:
-        //        _attackTimer += Time.deltaTime;
-        //        if (_enemySO._attackRange > _distanceToPlayer)
-        //        {
-        //            if (_attackTimer >= _enemySO._timeBtwnAttacks && !_isKnockback)
-        //            {
-        //                direction = (target.position - transform.position).normalized;
-        //                rotGoal = Quaternion.LookRotation(direction);
-        //                transform.rotation = Quaternion.Slerp(transform.rotation, rotGoal, turnSpeed);
-        //                _isShooting = true;
-        //                if(!_isDoneShooting)
-        //                {
-        //                    StartCoroutine(Shoot());
-        //                }
-        //            }
-        //        }
-        //        break;
-        //}
-
-        if(_enemySO._backingRange > _distanceToPlayer && !_isShooting)
+        if(_enemySO._backingRange > _distanceToPlayer && !_isShooting && !_isDashing)
         {
             Vector3 _dirToPlayer = transform.position - _player.transform.position;
             Vector3 _minimizedDirection = new Vector3(0f, 0f, 0f);
@@ -182,7 +193,7 @@ public class EnemyScript : MonoBehaviour
             _navMeshAgent.stoppingDistance = 0;
             _navMeshAgent.SetDestination(_newPos);
         }
-        else if((_enemySO._playerAggroRange > _distanceToPlayer) || _isHit)
+        else if((_enemySO._playerAggroRange > _distanceToPlayer) || _isHit && !_isDashing)
         {
             _navMeshAgent.stoppingDistance = _enemySO._stoppingRange;
             _navMeshAgent.SetDestination(_player.transform.position);   
@@ -197,6 +208,28 @@ public class EnemyScript : MonoBehaviour
         _isDoneShooting = false;
         _attackTimer = 0;
         _isShooting = false;
+    }
+
+    IEnumerator Slam()
+    {
+        _isDoneSlam = true;
+        yield return new WaitForSeconds(_timerToShoot);
+        Instantiate(_enemySO._attackPrefab, this.transform, false);
+        _isDoneSlam = false;
+        _attackTimer = 0;
+        _isSlam = false;
+
+    }
+
+    IEnumerator Dash()
+    {
+        float _startTime = Time.time;
+        while (Time.time < _startTime + _enemySO._dashTimer)
+        {
+            _navMeshAgent.Move(transform.forward * _enemySO._dashDistance * Time.deltaTime);
+            yield return null;
+        }
+        //_collider.enabled = true;
     }
 
     public Vector3 FindRoamDestination(float radius)
