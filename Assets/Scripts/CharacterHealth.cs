@@ -35,4 +35,13 @@ public class CharacterHealth : MonoBehaviour
             _gameOverScreen.SetActive(true);
         }
     }
+
+    public void AddHP(float addHP)
+    {
+        if ((_currentHp + (int)addHP) <= _maxHp)
+            _currentHp += (int)addHP;
+        else
+            _currentHp = _maxHp;
+        UpdateHP();
+    }
 }

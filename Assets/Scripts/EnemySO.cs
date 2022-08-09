@@ -18,4 +18,5 @@ public class EnemySO : ScriptableObject
     public float _backingRange;
     public float _dashTimer;
     public float _dashDistance;
+    public int _dashDamage;
 }

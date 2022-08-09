@@ -20,7 +20,7 @@ MonoBehaviour:
   _bowRange: 0
   _arrowPrefab: {fileID: 0}
   _enemyDetectionRange: 10
-  _damagePerHitFunnel: 5
+  _damagePerHitFunnel: 1
   _funnelCount: 7
   _funnelPrefab:
     m_AssetGUID: 3a65c43123ef93249a7f57e13939e72c

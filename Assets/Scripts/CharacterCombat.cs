@@ -279,7 +279,7 @@ public class CharacterCombat : MonoBehaviour
                                 }
                                 
                             }
-                            if (_rangeBow < _currentWeapon._bowRange && !_arrowBlock)
+                            if (_rangeBow < (_currentWeapon._bowRange + CharacterBuffs.PInstance.BowUpRange()) && !_arrowBlock)
                             {
                                 IncreaseRangeAndSprite();
                             }
@@ -321,7 +321,7 @@ public class CharacterCombat : MonoBehaviour
                         {
                             if(_enemies[i] != null)
                             {
-                                if(Vector3.Distance(this.transform.position, _enemies[i].transform.position) < _currentWeapon._enemyDetectionRange)
+                                if(Vector3.Distance(this.transform.position, _enemies[i].transform.position) < (_currentWeapon._enemyDetectionRange + CharacterBuffs.PInstance.FunnelIncreaseRange()))
                                 {
                                     if(!_inRangeEnemies.Contains(_enemies[i]))
                                     _inRangeEnemies.Add(_enemies[i]);
@@ -336,7 +336,7 @@ public class CharacterCombat : MonoBehaviour
 
                     if(_inRangeEnemies.Count != 0 && !CheckEnemyNull())
                     {
-                        if (_spawnedFunnel != _currentWeapon._funnelCount)
+                        if (_spawnedFunnel != (_currentWeapon._funnelCount + CharacterBuffs.PInstance.FunnelIncreaseNumber()))
                         {
                             StartCoroutine(SpawnFunnels());
                         }
@@ -375,15 +375,13 @@ public class CharacterCombat : MonoBehaviour
 
     IEnumerator SpawnFunnels()
     {
-        Debug.Log("Spawn");
         var _funnel = Addressables.InstantiateAsync(_currentWeapon._funnelPrefab, _funnelOutPosition.transform.position, Quaternion.identity);
-        Debug.Log(_funnel.IsDone);
         _spawnedFunnel++;
         yield return new WaitUntil(() => _funnel.IsDone);
             GameObject _funnelObj = _funnel.Result as GameObject;
             _funnelObj.GetComponent<FinFunnels>().PEnemies = _inRangeEnemies;
             _funnelObj.GetComponent<FinFunnels>().PInitialPos = _funnelInitialPos;
-            _funnelObj.GetComponent<FinFunnels>().PDamageToEnemy = _currentWeapon._damagePerHitFunnel;
+            _funnelObj.GetComponent<FinFunnels>().PDamageToEnemy = _currentWeapon._damagePerHitFunnel + (int)CharacterBuffs.PInstance.FunnelIncreaseDamage();
             _funnelObj.transform.parent = _funnelParent.transform;
         yield return new WaitForSeconds(_funnelDelaySpawn);
     }

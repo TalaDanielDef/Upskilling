@@ -33,6 +33,7 @@ public class EnemyScript : MonoBehaviour
     private bool _isSlam = false;
     private bool _isDoneSlam = false;
     private bool _isDashing = false;
+    private bool _dashDamage = false;
     private Quaternion rotGoal;
     private Vector3 direction;
     private Vector3 _knockbackPos;
@@ -148,6 +149,7 @@ public class EnemyScript : MonoBehaviour
                                 this.transform.LookAt(_player.transform);
                                 if(_isDashing)
                                 {
+                                    _dashDamage = true;
                                     StartCoroutine(Dash());
                                     _isDashing = false;
                                 }
@@ -229,7 +231,8 @@ public class EnemyScript : MonoBehaviour
             _navMeshAgent.Move(transform.forward * _enemySO._dashDistance * Time.deltaTime);
             yield return null;
         }
-        //_collider.enabled = true;
+        _dashDamage = false;
+        _collider.enabled = true;
     }
 
     public Vector3 FindRoamDestination(float radius)
@@ -272,6 +275,18 @@ public class EnemyScript : MonoBehaviour
     private void OnDrawGizmos()
     {
         //Gizmos.DrawSphere(this.transform.position, _enemySO._playerAggroRange);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(_enemySO._enemyType == EnemySO.EnemyType.Charging)
+        {
+            if(other.tag.Equals("Player"))
+            {
+                if(_dashDamage)
+                other.GetComponent<CharacterHealth>().ReduceHP(_enemySO._dashDamage);
+            }
+        }
     }
 
     public EnemySO PEnemySO { set { _enemySO = value; } }

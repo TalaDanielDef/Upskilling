@@ -518,7 +518,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7197263858672417068
 Transform:
   m_ObjectHideFlags: 0
@@ -613,7 +613,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3873080146868784509
 Transform:
   m_ObjectHideFlags: 0
@@ -1568,7 +1568,7 @@ SphereCollider:
   m_GameObject: {fileID: 5396603212097767131}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.50000024
   m_Center: {x: -0.000003814699, y: 0, z: -0.0000009536748}
@@ -2145,8 +2145,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 2.215999, z: 1}
-  m_Center: {x: 0, y: 1.0854672, z: 0}
+  m_Size: {x: 1.3909746, y: 2.215999, z: 1.3453022}
+  m_Center: {x: 0.024470001, y: 1.0854672, z: -0.03942609}
 --- !u!114 &6121200283736888800
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2168,12 +2168,14 @@ MonoBehaviour:
   _roamRadius: 5
   _bulletPlace: {fileID: 6121200283371159853}
   _player: {fileID: 0}
-  _bodyTypes: []
+  _bodyTypes:
+  - {fileID: 2037482992056632061}
+  - {fileID: 2654417895956955201}
   _currentState: 0
-  _enemySO: {fileID: 11400000, guid: ce8d9a091b8014c4890523d810fae4e9, type: 2}
+  _enemySO: {fileID: 11400000, guid: d4687b1e6c1fedc4faee69efdd48e140, type: 2}
   _hpBar: {fileID: 6121200283522906625}
   _currentEnemyBodyType: 0
-  _collider: {fileID: 0}
+  _collider: {fileID: 881681029}
   turnSpeed: 0.1
 --- !u!195 &6121200283736888829
 NavMeshAgent:
@@ -2193,7 +2195,7 @@ NavMeshAgent:
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
-  m_Height: 2
+  m_Height: 2.29
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
@@ -2208,8 +2210,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 2.2190225, z: 1}
-  m_Center: {x: 0, y: 1.0868672, z: 0}
+  m_Size: {x: 1, y: 2.2190225, z: 0.9913211}
+  m_Center: {x: 4.6451874e-11, y: 1.0868672, z: -0.0043395604}
 --- !u!1 &6529288998836852806
 GameObject:
   m_ObjectHideFlags: 0
@@ -2878,7 +2880,7 @@ GameObject:
   - component: {fileID: 5159003694767056742}
   - component: {fileID: 580557375760886726}
   m_Layer: 8
-  m_Name: r
+  m_Name: Face
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2956,7 +2958,7 @@ CapsuleCollider:
   m_GameObject: {fileID: 8854889870265604335}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 0.50000036
   m_Height: 2
   m_Direction: 1

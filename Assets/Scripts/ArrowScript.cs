@@ -31,7 +31,7 @@ public class ArrowScript : MonoBehaviour
     {
         if(other.tag.Equals("Enemy"))
         {
-            other.GetComponent<EnemyScript>().ReduceHP(_arrowDamage);
+            other.GetComponent<EnemyScript>().ReduceHP(_arrowDamage + (int)(CharacterBuffs.PInstance.BowDamageBuff()));
             Destroy(this.gameObject);
         }
     }
