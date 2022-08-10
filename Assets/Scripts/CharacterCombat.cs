@@ -124,6 +124,9 @@ public class CharacterCombat : MonoBehaviour
 
         if(_initialRangeBow == 0)
             _initialRangeBow = _rangeBow;
+
+        _currentWeaponType = _currentWeapon._weaponType;
+
     }
 
     // Update is called once per frame
@@ -460,4 +463,6 @@ public class CharacterCombat : MonoBehaviour
     public WeaponSO PCurrentWeaponSO { set { _currentWeapon = value; } get { return _currentWeapon; } }
     public List<GameObject> PEnemiesInRange { get { return _inRangeEnemies; } set { _inRangeEnemies = value; } }
     public int PSpawnedFunnel { get { return _spawnedFunnel; } set { _spawnedFunnel = value; } }
+
+    public WeaponTypes PCurrentWeaponType { get { return _currentWeaponType; } }
 }

@@ -16,10 +16,12 @@ public class SwordCollision : MonoBehaviour
         if(other.tag.Equals("Enemy"))
         {
             other.GetComponent<EnemyScript>().ReduceHP(_characterCombat._currentWeaponDamage + (int)CharacterBuffs.PInstance.SwordDamageBuff());
-            _characterCombat.gameObject.GetComponent<CharacterHealth>().AddHP(CharacterBuffs.PInstance.SwordLifeSteal());
             _characterCombat._currentWeaponDamage = 0;
             if(_characterCombat._isAttacking)
-            other.GetComponent<EnemyScript>().KnockBack(_characterCombat._currentWeaponKnockback);
+            {
+                other.GetComponent<EnemyScript>().KnockBack(_characterCombat._currentWeaponKnockback);
+                _characterCombat.gameObject.GetComponent<CharacterHealth>().AddHP(CharacterBuffs.PInstance.SwordLifeSteal());
+            }
             _characterCombat._currentWeaponKnockback = 0;
         }
     }

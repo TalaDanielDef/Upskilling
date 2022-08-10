@@ -520,8 +520,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8252a8302dab6d346ae44c3a31988f0a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _currentWeaponType: 2
-  _currentWeapon: {fileID: 11400000, guid: bee4e011635babd499871cbde064b3c2, type: 2}
+  _currentWeaponType: 0
+  _currentWeapon: {fileID: 11400000, guid: 653e1129e2413a64badcb0051558c20a, type: 2}
   _swordWeapon: {fileID: 125842428}
   _bowWeapon: {fileID: 554938096}
   _animator: {fileID: 104873217}
@@ -563,13 +563,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _currentBuffs: []
-  _swordDamageMultiplier: 0
-  _swordLifeStealBase: 0
-  _bowRangeMultiplier: 0
-  _bowDamageMultiplier: 0
-  _funnelRangeMultiplier: 0
-  _funnelNumberBase: 0
-  _funnelDamageMultiplier: 0
+  _swordDamageMultiplier: 2
+  _swordLifeStealBase: 3
+  _bowRangeMultiplier: 3
+  _bowDamageMultiplier: 5
+  _funnelRangeMultiplier: 2
+  _funnelNumberBase: 5
+  _funnelDamageMultiplier: 1
 --- !u!1 &125842428 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: b4da2d7844ac3c5498570a6250976b4a, type: 3}
@@ -1540,6 +1540,76 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e5f4daf24146ee040b5a2d7a73b30aa0, type: 3}
+--- !u!1 &375330076
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 375330078}
+  - component: {fileID: 375330077}
+  m_Layer: 0
+  m_Name: BuffSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &375330077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375330076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5d1f2620df4cfb48b6f6e8746ccac50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _swordBuffs:
+  - _buffTypes: 0
+    _buffChances: 25
+    _buffPrefab: {fileID: 0}
+  - _buffTypes: 1
+    _buffChances: 25
+    _buffPrefab: {fileID: 0}
+  - _buffTypes: 2
+    _buffChances: 50
+    _buffPrefab: {fileID: 0}
+  _bowBuffs: []
+  _funnelBuffs: []
+  _generalBuffs:
+  - _buffTypes: 5
+    _buffChances: 25
+    _buffPrefab: {fileID: 0}
+  - _buffTypes: 6
+    _buffChances: 25
+    _buffPrefab: {fileID: 0}
+  - _buffTypes: 7
+    _buffChances: 25
+    _buffPrefab: {fileID: 0}
+  - _buffTypes: 4
+    _buffChances: 25
+    _buffPrefab: {fileID: 0}
+  _chancesForMainWeap: 50
+  _chancesForGeneral: 50
+--- !u!4 &375330078
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375330076}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.693377, y: 1.381808, z: -0.6341411}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 25
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &394837928
 GameObject:
   m_ObjectHideFlags: 0
