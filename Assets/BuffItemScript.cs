@@ -36,4 +36,6 @@ public class BuffItemScript : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
+
+    public CharacterBuffs.BuffTypes PPlayerBuff { get { return _buffType; } }
 }

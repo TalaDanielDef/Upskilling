@@ -35,7 +35,9 @@ public class CharacterBuffs : MonoBehaviour
         BowIncreaseDamage,
         FunnelIncreaseRange,
         FunnelIncreaseNumber,
-        FunnelIncreaseDamage
+        FunnelIncreaseDamage,
+        HealthIncrease,
+        SpeedIncrease
     }
 
     public float SwordDamageBuff()
